@@ -26,6 +26,7 @@ export const metadata: Metadata = {
 };
 
 import Navbar from "@/components/shared/Navbar";
+import CustomCursor from "@/components/shared/CustomCursor";
 import { ThemeProvider } from "@/providers/theme-provider";
 
 export default function RootLayout({
@@ -46,6 +47,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <CustomCursor />
           <Navbar />
           <main className="pt-20">
             {children}

@@ -1,10 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, JSX } from "react";
+import { flushSync } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, User, Code, Briefcase, Mail, Menu, X, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
+
+declare global {
+  interface Document {
+    startViewTransition(callback: () => void): {
+      ready: Promise<void>;
+      finished: Promise<void>;
+      updateCallbackDone: Promise<void>;
+    };
+  }
+}
 
 const navItems = [
   { name: "Home", href: "#", icon: Home },
@@ -29,6 +40,46 @@ export default function Navbar(): JSX.Element {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const toggleTheme = (e: React.MouseEvent) => {
+    // Check for browser support
+    if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setTheme(theme === "dark" ? "light" : "dark");
+      return;
+    }
+
+    const x = e.clientX;
+    const y = e.clientY;
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    const nextTheme = theme === "dark" ? "light" : "dark";
+
+    const transition = document.startViewTransition(() => {
+      flushSync(() => {
+        setTheme(nextTheme);
+      });
+    });
+
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration: 500,
+          easing: "ease-in-out",
+          fill: "forwards",
+          pseudoElement: "::view-transition-new(root)",
+        }
+      );
+    });
+  };
+
   return (
     <header
       className={cn(
@@ -36,13 +87,13 @@ export default function Navbar(): JSX.Element {
         scrolled ? "bg-background/80 backdrop-blur-md border-b border-border/40 py-3" : "bg-transparent"
       )}
     >
-      <nav className="max-w-7xl mx-auto flex items-center justify-between">
+      <nav className="container mx-auto flex items-center justify-between">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent"
         >
-          RAYHAN
+         Abu Rayhan
         </motion.div>
 
         {/* Desktop Navigation */}
@@ -54,12 +105,12 @@ export default function Navbar(): JSX.Element {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="group relative text-sm font-medium text-foreground/70 hover:text-foreground transition-colors flex items-center gap-2"
+              className="group relative text-sm  font-medium text-foreground/70 hover:text-foreground transition-colors flex items-center gap-2"
             >
               <item.icon className="w-4 h-4" />
               {item.name}
               <motion.span
-                className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"
+                className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary/60 group-hover:w-full transition-all duration-300"
                 layoutId="navbar-underline"
               />
             </motion.a>
@@ -67,8 +118,8 @@ export default function Navbar(): JSX.Element {
 
           {/* Theme Toggle */}
           <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-2 rounded-full hover:bg-foreground/10 transition-colors"
+            onClick={toggleTheme}
+            className="p-2 cursor-pointer rounded-full hover:bg-foreground/10 transition-colors"
           >
             {mounted && (theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />)}
           </button>
@@ -78,7 +129,7 @@ export default function Navbar(): JSX.Element {
             animate={{ opacity: 1, scale: 1 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-primary text-primary-foreground px-5 py-2 rounded-full text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+            className="bg-primary cursor-pointer text-primary-foreground px-5 py-2 rounded-full text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
           >
             Hire Me
           </motion.button>
@@ -87,7 +138,7 @@ export default function Navbar(): JSX.Element {
         {/* Mobile Toggle */}
         <div className="md:hidden flex items-center gap-4">
           <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            onClick={toggleTheme}
             className="p-2 rounded-full hover:bg-foreground/10 transition-colors"
           >
             {mounted && (theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />)}
