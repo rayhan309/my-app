@@ -80,7 +80,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">{item.label}</p>
-                    <a href={item.href} className="text-lg font-bold hover:text-primary transition-colors">
+                    <a href={item.href} className="text-lg font-bold text-white/70 hover:text-primary/60  transition-colors">
                       {item.value}
                     </a>
                   </div>
@@ -89,7 +89,7 @@ export default function ContactSection() {
             </div>
 
             {/* Social Links */}
-            <div className="flex gap-4 pt-4">
+            {/* <div className="flex gap-4 pt-4">
               {[FaGithub, FaLinkedin, FaTwitter, FaFacebook].map((Icon, i) => (
                 <a
                   key={i}
@@ -99,7 +99,7 @@ export default function ContactSection() {
                   <Icon size={20} />
                 </a>
               ))}
-            </div>
+            </div> */}
           </motion.div>
 
           {/* Right Side: Contact Form */}
