@@ -17,7 +17,7 @@ export type ContactMailFields = {
 };
 
 /** Public portfolio (live site) */
-export const PORTFOLIO_URL = "https://my-portfolio-type.vercel.app/";
+export const PORTFOLIO_URL = "https://rayhanwebdev.vercel.app/";
 
 /** Company */
 export const FLEXSHIP_URL = "https://flexshipit.com";

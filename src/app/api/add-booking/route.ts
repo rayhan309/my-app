@@ -8,6 +8,7 @@ import {
   parseLocalYMD,
   slotsForSelectedDate,
 } from "@/lib/booking-schedule";
+import { sendBookingEmails } from "@/lib/mail/send-booking-emails";
 
 export const BOOKINGS_COLLECTION_NAME =
   process.env.MONGO_BOOKINGS_COLLECTION?.trim() || "bookings";
@@ -162,6 +163,23 @@ export async function POST(req: Request) {
         { message: "Failed to save booking.", success: false },
         { status: 500 }
       );
+    }
+
+    try {
+      await sendBookingEmails({
+        name,
+        email,
+        phone,
+        date,
+        time,
+        time12h,
+        meetingEnds12h,
+        durationMinutes,
+        notes,
+        appointmentAtIso: appointmentAt.toISOString(),
+      });
+    } catch (mailErr) {
+      console.error("Booking saved but email failed:", mailErr);
     }
 
     return NextResponse.json(

@@ -59,6 +59,7 @@ export default function BookingMeetingClient() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const isFriday = new Date().getDay() === 5;
 
   const todayStr = useMemo(
     () => formatLocalYMD(startOfLocalDay(new Date())),
@@ -188,6 +189,18 @@ export default function BookingMeetingClient() {
     }
   };
 
+  // if (isFriday) {
+  //   return (
+  //     <div className="relative min-h-[calc(100vh-5rem)] pb-20 pt-10">
+  //       <div className="container mx-auto px-4">
+  //         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] ${jakartaSans.className}">
+  //           Friday is closed
+  //         </h1>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
   return (
     <div className="relative min-h-[calc(100vh-5rem)] pb-20 pt-10">
       <div className="container mx-auto px-4">
@@ -206,12 +219,23 @@ export default function BookingMeetingClient() {
               Back to Home
             </Link>
 
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6">
+            <div
+              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-sm font-medium mb-6 ${isFriday
+                  ? "bg-red-100/20 border-red-200/20 text-red-600" // শুক্রবারের জন্য লালচে কালার
+                  : "bg-primary/10 border-primary/20 text-primary" // অন্য দিনের জন্য প্রাইমারি কালার
+                }`}
+            >
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                <span
+                  className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isFriday ? "bg-red-500" : "bg-primary"
+                    }`}
+                />
+                <span
+                  className={`relative inline-flex rounded-full h-2 w-2 ${isFriday ? "bg-red-500" : "bg-primary"
+                    }`}
+                />
               </span>
-              Available now
+              {isFriday ? "Friday is closed" : "Available now"}
             </div>
           </div>
 
@@ -369,12 +393,12 @@ export default function BookingMeetingClient() {
                         required: "Please choose a time",
                         validate: (v) =>
                           selectedDate &&
-                          selectableSlots.length > 0 &&
-                          selectableSlots.includes(v)
+                            selectableSlots.length > 0 &&
+                            selectableSlots.includes(v)
                             ? true
                             : selectedDate &&
-                                allSlotsForDate.length > 0 &&
-                                selectableSlots.length === 0
+                              allSlotsForDate.length > 0 &&
+                              selectableSlots.length === 0
                               ? "Every slot on this day already has an appointment — pick another day."
                               : selectedDate && allSlotsForDate.length === 0
                                 ? "No slots left for this date — pick another day."
