@@ -4,6 +4,9 @@ import { JSX } from "react";
 import Hero from "@/components/home/Hero";
 import About from "@/components/home/About";
 import SkillsSection from "@/components/home/Skills/SkillsSection";
+import ProjectsSection from "@/components/home/Projects/ProjectsSection";
+import ContactSection from "@/components/home/Contact/ContactSection";
+import FinalSection from "@/components/home/FinalSection";
 
 export default function Home(): JSX.Element {
   return (
@@ -13,8 +16,10 @@ export default function Home(): JSX.Element {
         <Hero />
         <About />
         <SkillsSection />
-        {/* Additional sections can be added here */}
-        <div className="h-[20vh]" /> 
+        <ProjectsSection />
+        <ContactSection />
+        <FinalSection />
+        {/* Spacing remove or adjust */}
       </main>
     </div>
   );

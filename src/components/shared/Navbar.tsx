@@ -89,13 +89,15 @@ export default function Navbar(): JSX.Element {
       )}
     >
       <nav className="container mx-auto flex items-center justify-between">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent"
-        >
-          Abu Rayhan
-        </motion.div>
+        <Link href="/">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent"
+          >
+            Abu Rayhan
+          </motion.div>
+          </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
