@@ -76,6 +76,7 @@ import CustomCursor from "@/components/shared/CustomCursor";
 import { ThemeProvider } from "@/providers/theme-provider";
 import Background3D from "@/components/shared/Background3D";
 import OverlayPattern from "@/components/shared/OverlayPattern";
+import QueryProvider from "@/providers/query-provider";
 
 export default function RootLayout({
   children,
@@ -97,21 +98,23 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* custom cursor */}
-          <CustomCursor />
-          {/* 3D Background */}
-          <Background3D />
-          
-          {/* Overlay Pattern */}
-         <OverlayPattern />
+          <QueryProvider>
+            {/* custom cursor */}
+            <CustomCursor />
+            {/* 3D Background */}
+            <Background3D />
+            
+            {/* Overlay Pattern */}
+            <OverlayPattern />
 
-          {/* navbar */}
-          <Navbar />
+            {/* navbar */}
+            <Navbar />
 
-          {/* main */}
-          <main className="pt-20">
-            {children}
-          </main>
+            {/* main */}
+            <main className="pt-20">
+              {children}
+            </main>
+          </QueryProvider>
         </ThemeProvider>
 
       </body>

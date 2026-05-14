@@ -110,7 +110,7 @@ export default function ContactSection() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative"
           >
-            <div className="bg-card/40 border border-border/10 p-8 md:p-10 rounded-md backdrop-blur-sm shadow-2xl">
+            <div className="bg-card/40 border border-border/10 p-6 md:p-10 rounded-md backdrop-blur-sm shadow-2xl">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
                 {/* Name Field */}
@@ -151,7 +151,7 @@ export default function ContactSection() {
 
                 {/* Message Field */}
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-foreground">Message</label>
+                  <label className="text-sm opacity-65 font-bold text-foreground">Message</label>
                   <textarea
                     {...register("description", { required: "Message is required", minLength: { value: 10, message: "Tell me a bit more..." } })}
                     rows={4}

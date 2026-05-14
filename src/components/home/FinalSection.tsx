@@ -14,7 +14,7 @@ export default function FinalSection() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="pb-10 md:pb-20 pt-10 md:pt-20 relative overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center text-center space-y-12">
           
