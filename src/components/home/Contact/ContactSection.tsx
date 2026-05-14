@@ -17,11 +17,13 @@ type ContactFormData = {
   email: string;
   phone: string;
   description: string;
+  subject: string;
 };
 
 export default function ContactSection() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
 
   const {
     register,
@@ -32,13 +34,36 @@ export default function ContactSection() {
 
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log("Form Data:", data);
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    reset();
-    setTimeout(() => setIsSuccess(false), 5000);
+    setSubmitError(null);
+    setIsSuccess(false);
+
+    try {
+      const res = await fetch("/api/add-contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      const json = (await res.json()) as { message?: string; success?: boolean };
+      
+      console.log(json, "json");
+      console.log(res, "res");
+
+      if (!res.ok || !json?.success) {
+        throw new Error(json.message || "Failed to send message");
+      }
+      reset();
+      setIsSuccess(true);
+      setTimeout(() => setIsSuccess(false), 6000);
+    } catch (error) {
+      console.error(error);
+      setSubmitError(
+        error instanceof Error ? error.message : "Failed to send message"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -149,6 +174,18 @@ export default function ContactSection() {
                   </div>
                 </div>
 
+                {/* subject */}
+
+                <div className="space-y-2">
+                  <label className="text-sm opacity-65 font-bold text-foreground">Subject</label>
+                  <input
+                    {...register("subject", { required: "Subject is required" })}
+                    placeholder="Subject"
+                    className={`w-full bg-background/50 border ${errors.subject ? 'border-red-500' : 'border-border/50'} px-5 py-4 rounded-md focus:outline-none focus:border-primary transition-colors`}
+                  />
+                  {errors.subject && <p className="text-xs text-red-500 font-medium">{errors.subject.message}</p>}
+                </div>
+
                 {/* Message Field */}
                 <div className="space-y-2">
                   <label className="text-sm opacity-65 font-bold text-foreground">Message</label>
@@ -177,13 +214,20 @@ export default function ContactSection() {
                   )}
                 </button>
 
+                {submitError && (
+                  <p className="text-center text-sm text-red-500 font-medium">
+                    {submitError}
+                  </p>
+                )}
+
                 {isSuccess && (
                   <motion.p
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-center text-sm text-green-500 font-bold"
                   >
-                    Message sent successfully! I'll get back to you soon.
+                    Message sent successfully! Check your email for a
+                    confirmation — I&apos;ll reply soon.
                   </motion.p>
                 )}
               </form>
