@@ -83,7 +83,7 @@ export default function Navbar(): JSX.Element {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 py-4",
         scrolled ? "bg-background/80 backdrop-blur-md border-b border-border/40 py-3" : "bg-transparent"
       )}
     >
@@ -93,7 +93,7 @@ export default function Navbar(): JSX.Element {
           animate={{ opacity: 1, x: 0 }}
           className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent"
         >
-         Abu Rayhan
+          Abu Rayhan
         </motion.div>
 
         {/* Desktop Navigation */}
