@@ -2,7 +2,7 @@
 export const MEETING_DURATION_MINUTES = 30;
 
 /** How far ahead someone may book (excludes “open-ended” far future). */
-export const MAX_BOOKING_ADVANCE_DAYS = 60;
+export const MAX_BOOKING_ADVANCE_DAYS = 10;
 
 /** Minimum lead time from “now” when booking the same calendar day (minutes). */
 export const SAME_DAY_MIN_LEAD_MINUTES = 60;
@@ -16,11 +16,64 @@ export const AVAILABILITY_START_HOUR = 10;
  */
 export const AVAILABILITY_END_HOUR = 23;
 
+/** IANA zone for “today” when listing bookings (past calendar days excluded). Server: `BOOKING_TIMEZONE`; client: `NEXT_PUBLIC_BOOKING_TZ`. */
+export const BOOKING_LIST_CALENDAR_TZ =
+  (typeof process !== "undefined" &&
+    (process.env.BOOKING_TIMEZONE?.trim() ||
+      process.env.NEXT_PUBLIC_BOOKING_TZ?.trim())) ||
+  "Asia/Dhaka";
+
+/**
+ * Calendar YYYY-MM-DD for “now” in the given IANA timezone (default booking list TZ).
+ */
+export function getTodayYmdInTimeZone(tz: string = BOOKING_LIST_CALENDAR_TZ): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
 function formatHour12(h: number, minute: number): string {
   const period = h >= 12 ? "PM" : "AM";
   const h12 = h % 12 || 12;
   const m = minute === 0 ? "" : `:${String(minute).padStart(2, "0")}`;
   return `${h12}${m || ":00"} ${period}`;
+}
+
+/**
+ * Converts a 24h slot like "12:30" into locale-friendly 12h text (e.g. "12:30 PM").
+ * `value` stays "HH:mm"; use this only for display.
+ */
+export function formatSlotDisplay12h(
+  hhmm: string,
+  locales?: Intl.LocalesArgument,
+  options?: Intl.DateTimeFormatOptions
+): string {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(hhmm.trim());
+  if (!match) return hhmm;
+  const h = parseInt(match[1], 10);
+  const min = parseInt(match[2], 10);
+  if (h > 23 || min > 59 || Number.isNaN(h) || Number.isNaN(min)) return hhmm;
+  const d = new Date(2000, 0, 1, h, min, 0, 0);
+  return d.toLocaleTimeString(locales, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    ...options,
+  });
+}
+
+/** Add minutes to "HH:mm" → "HH:mm" (for slot end, etc.). */
+export function addMinutesToSlotHHmm(hhmm: string, minutes: number): string {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(hhmm.trim());
+  if (!match) return hhmm;
+  const h = parseInt(match[1], 10);
+  const min = parseInt(match[2], 10);
+  if (Number.isNaN(h) || Number.isNaN(min)) return hhmm;
+  const d = new Date(2000, 0, 1, h, min + minutes, 0, 0);
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
 /** e.g. "10:00 AM – 11:00 PM" for UI copy */

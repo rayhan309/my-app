@@ -1,4 +1,16 @@
-import { MongoClient, ServerApiVersion, MongoClientOptions, Collection } from 'mongodb';
+import {
+  MongoClient,
+  ServerApiVersion,
+  MongoClientOptions,
+  Collection,
+  type Document,
+} from "mongodb";
+import dns from "dns";
+
+// Fix for querySrv ECONNREFUSED issues by using Google DNS
+if (typeof dns.setServers === "function") {
+  dns.setServers(["8.8.8.8", "8.8.4.4"]);
+}
 
 const uri = process.env.MONGO_DB_URI as string;
 const dbname = process.env.MONGO_DB_NAME as string;
@@ -16,6 +28,7 @@ const options: MongoClientOptions = {
     },
     maxPoolSize: 10,
     minPoolSize: 5,
+    connectTimeoutMS: 10000, // 10 seconds timeout
 };
 
 let client: MongoClient;
@@ -45,8 +58,10 @@ client.connect().catch((error) => console.error("Global MongoDB Connection Error
  * Returns a MongoDB collection from the cached database connection.
  * @param cname The collection name to retrieve.
  */
-export const dbConnect = <T extends Document = any>(cname: string): Collection<T> => {
-    return client.db(dbname).collection<T>(cname);
+export const dbConnect = <T extends Document = Document>(
+  cname: string
+): Collection<T> => {
+  return client.db(dbname).collection<T>(cname);
 };
 
 export default dbConnect;
