@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 // Inter font update
@@ -16,6 +16,8 @@ export const metadata: Metadata = {
 import Navbar from "@/components/shared/Navbar";
 import CustomCursor from "@/components/shared/CustomCursor";
 import { ThemeProvider } from "@/providers/theme-provider";
+import Background3D from "@/components/shared/Background3D";
+import OverlayPattern from "@/components/shared/OverlayPattern";
 
 export default function RootLayout({
   children,
@@ -33,12 +35,17 @@ export default function RootLayout({
         {/* theme provider */}
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
           {/* custom cursor */}
           <CustomCursor />
+          {/* 3D Background */}
+          <Background3D />
+          
+          {/* Overlay Pattern */}
+         <OverlayPattern />
 
           {/* navbar */}
           <Navbar />

@@ -3,9 +3,10 @@
 import React, { useState, useEffect, JSX } from "react";
 import { flushSync } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, User, Code, Briefcase, Mail, Menu, X, Sun, Moon } from "lucide-react";
+import { Home, User, Code, Briefcase, Mail, Menu, X, Sun, Moon, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 
 declare global {
   interface Document {
@@ -127,11 +128,24 @@ export default function Navbar(): JSX.Element {
           <motion.button
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.05 }}
+            // whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-primary cursor-pointer text-primary-foreground px-5 py-2 rounded-full text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+            className="group flex cursor-pointer items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+            onClick={() => window.location.href = "/booking-meeting"}
           >
-            Hire Me
+            {/* Sliding Icon Container */}
+            <span className="relative flex h-4 w-4 overflow-hidden">
+              <Send
+                size={16}
+                className="absolute transition-all duration-500 group-hover:-translate-y-5 group-hover:translate-x-5"
+              />
+              <Send
+                size={16}
+                className="absolute translate-y-5 -translate-x-5 transition-all duration-500 group-hover:translate-y-0 group-hover:translate-x-0"
+              />
+            </span>
+
+            <span>Book a Meeting</span>
           </motion.button>
         </div>
 
@@ -173,9 +187,9 @@ export default function Navbar(): JSX.Element {
                   {item.name}
                 </a>
               ))}
-              <button className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold mt-2">
-                Hire Me
-              </button>
+              <Link href="/booking-meeting" className="w-full bg-primary text-primary-foreground py-3 rounded-md px-3 font-semibold mt-2">
+                Book a Meeting
+              </Link>
             </div>
           </motion.div>
         )}
