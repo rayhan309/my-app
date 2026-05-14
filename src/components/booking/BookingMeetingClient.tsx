@@ -23,6 +23,7 @@ import {
   startOfLocalDay,
 } from "@/lib/booking-schedule";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { refreshBooking } from "@/lib/refreshCache";
 
 export type BookingRow = {
   _id: string;
@@ -172,6 +173,7 @@ export default function BookingMeetingClient() {
       if (!res.ok || !json?.success) {
         throw new Error(json.message || "Failed to save booking");
       }
+      await refreshBooking('bookings');
       await queryClient.invalidateQueries({ queryKey: ["bookings"] });
       setIsSuccess(true);
       reset();

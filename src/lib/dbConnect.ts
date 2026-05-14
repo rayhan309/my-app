@@ -5,12 +5,12 @@ import {
   Collection,
   type Document,
 } from "mongodb";
-import dns from "dns";
+// import dns from "dns";
 
-// Fix for querySrv ECONNREFUSED issues by using Google DNS
-if (typeof dns.setServers === "function") {
-  dns.setServers(["8.8.8.8", "8.8.4.4"]);
-}
+// // Fix for querySrv ECONNREFUSED issues by using Google DNS
+// if (typeof dns.setServers === "function") {
+//   dns.setServers(["8.8.8.8", "8.8.4.4"]);
+// }
 
 const uri = process.env.MONGO_DB_URI as string;
 const dbname = process.env.MONGO_DB_NAME as string;
