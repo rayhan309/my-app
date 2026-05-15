@@ -50,7 +50,7 @@ export default function ProjectCard({ project, index }: { project: any; index: n
 
       {/* Project Info */}
       <div className="p-6 space-y-4">
-        <Link href={`/project/${project.id}`} target="_blank" rel="noopener noreferrer" className="flex justify-between items-start">
+        <Link href={`/projects/${project.id}`} className="flex justify-between items-start">
           <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
             {project.title}
           </h3>
