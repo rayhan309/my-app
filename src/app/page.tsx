@@ -1,14 +1,16 @@
 "use client";
 
 import { JSX } from "react";
-import Hero from "@/components/home/Hero";
-import About from "@/components/home/About";
+import Hero from "@/components/home/Hero/Hero";
+import About from "@/components/home/About/About";
 import SkillsSection from "@/components/home/Skills/SkillsSection";
 import ProjectsSection from "@/components/home/Projects/ProjectsSection";
 import ContactSection from "@/components/home/Contact/ContactSection";
-import FinalSection from "@/components/home/FinalSection";
+import FinalSection from "@/components/home/FinalSection/FinalSection";
+import Services from "@/components/home/Services/Services";
 
 export default function Home(): JSX.Element {
+
   return (
     <div className="relative min-h-screen">
       {/* Main Sections */}
@@ -17,8 +19,10 @@ export default function Home(): JSX.Element {
         <About />
         <SkillsSection />
         <ProjectsSection />
+        <Services />
         <ContactSection />
         <FinalSection />
+
         {/* Spacing remove or adjust */}
       </main>
     </div>

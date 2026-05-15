@@ -4,6 +4,7 @@ import SkillsGrid from "./SkillsGrid";
 import { JSX } from "react";
 import { motion } from "framer-motion";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import Link from "next/link";
 
 const jakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -12,7 +13,7 @@ const jakartaSans = Plus_Jakarta_Sans({
 
 export default function SkillsSection(): JSX.Element {
   return (
-    <section id="skills" className="py-20 relative overflow-hidden">
+    <section id="skills" className="pt-20 relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute bottom-0 right-1/2 translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       
@@ -48,6 +49,15 @@ export default function SkillsSection(): JSX.Element {
         </div>
 
         <SkillsGrid />
+      </div>
+
+      <div className="w-fit mx-auto pt-20 pb-16">
+        <Link href="/services" className="px-10 py-4 bg-transparent border border-border hover:border-primary/50 text-foreground rounded-md font-bold transition-all hover:bg-primary/5 group">
+            Services
+            <motion.span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">
+              →
+            </motion.span>
+          </Link>
       </div>
     </section>
   );

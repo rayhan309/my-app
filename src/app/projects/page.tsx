@@ -1,7 +1,7 @@
 import ProjectCard from "@/components/projects/ProjectCard/ProjectCard";
 import { Allprojects } from "@/lib/projects/Projects";
 import PageHeader from "@/components/projects/PageHeaders/PageHeaders";
-import FinalSection from "@/components/home/FinalSection";
+import FinalSection from "@/components/home/FinalSection/FinalSection";
 
 export default function ProjectsPage() {
   const projects = Allprojects;
