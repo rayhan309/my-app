@@ -15,32 +15,68 @@ const jakartaSans = Plus_Jakarta_Sans({
 });
 
 const projects = [
-  {
-    id: "1",  
-    title: "EcoSmart Dashboard",
-    description: "An advanced energy monitoring system for smart homes with real-time data visualization.",
-    image: "/project_dashboard_mockup_1778736094647.png",
-    githubLink: "https://github.com/rayhan309",
-    liveLink: "https://ecosmart-demo.vercel.app",
-    technologies: ["Next.js", "TypeScript", "Tailwind", "Socket.io"],
-  },
+  // {
+  //   id: "1",
+  //   title: "FairBazar",
+  //   description: "A comprehensive e-commerce platform designed for seamless shopping experiences with a clean, modern UI.",
+  //   image: "/fairbazar_mockup.png", // Update with your actual screenshot path
+  //   githubLink: "https://github.com/rayhan309",
+  //   liveLink: "https://fairbazar.vercel.app/",
+  //   technologies: ["Next.js", "Tailwind CSS", "Redux", "Node.js"],
+  // },
   {
     id: "2",
-    title: "LuxeTime E-commerce",
-    description: "A high-end luxury watch marketplace with seamless checkout and AR product preview.",
-    image: "/project_ecommerce_mockup_1778736113999.png",
+    title: "Fashion Museum BD",
+    description: "A premium fashion retail solution focusing on high-quality visual presentation and user engagement.",
+    image: "/fashionmuseum_mockup.png",
     githubLink: "https://github.com/rayhan309",
-    liveLink: "https://luxetime-shop.vercel.app",
-    technologies: ["React", "Shopify API", "Framer Motion", "Node.js"],
+    liveLink: "https://fashionmuseumbd.com/",
+    technologies: ["Next.js", "React", "Tailwind CSS", "Vercel", "MUI", "Framer Motion"],
   },
   {
-    id: "3",  
-    title: "CyberShield Pro",
-    description: "A comprehensive cybersecurity dashboard for tracking and mitigating digital threats.",
-    image: "/project_dashboard_mockup_1778736094647.png", // Reusing for demo
+    id: "7",
+    title: "ChatsNest",
+    description: "A real-time instant messaging application featuring seamless room-based communication and live interaction using WebSockets.",
+    image: "/chatsnest_mockup.png", // actual path check kore nio
     githubLink: "https://github.com/rayhan309",
-    liveLink: "https://cybershield-pro.vercel.app",
-    technologies: ["Python", "Vue.js", "FastAPI", "MongoDB"],
+    liveLink: "https://chatsnest.vercel.app/",
+    technologies: ["Next.js", "Socket.io", "Express.js", "Tailwind CSS"],
+  },
+  {
+    id: "3",
+    title: "Ibrahim Mahmud Portfolio",
+    description: "A professional digital strategist portfolio showcasing services, results, and expertise with sleek animations.",
+    image: "/ibrahim_portfolio_mockup.png",
+    githubLink: "https://github.com/rayhan309",
+    liveLink: "https://ibrahimmahmud.com/",
+    technologies: ["Next.js", "Framer Motion", "Tailwind", "Lucide Icons"],
+  },
+  {
+    id: "4",
+    title: "Automation Section",
+    description: "A specialized automation landing page demonstrating high-speed processing and modern interface logic.",
+    image: "/automation_mockup.png",
+    githubLink: "https://github.com/rayhan309",
+    liveLink: "https://next-js-la-section-automation.vercel.app/",
+    technologies: ["Next.js", "TypeScript", "GSAP", "Server Components"],
+  },
+  {
+    id: "5",
+    title: "Halal Market BD",
+    description: "A niche e-commerce marketplace focused on halal-certified products with secure payment integration.",
+    image: "/halalmarket_mockup.png",
+    githubLink: "https://github.com/rayhan309",
+    liveLink: "https://halalmarketbd.com/",
+    technologies: ["React", "Node.js", "MongoDB", "Payment Gateway"],
+  },
+  {
+    id: "6",
+    title: "FlexShip IT",
+    description: "Official agency website for FlexShip IT, highlighting high-performance software engineering and digital solutions.",
+    image: "/flexship_mockup.png",
+    githubLink: "https://github.com/rayhan309",
+    liveLink: "https://flexship-it.vercel.app/",
+    technologies: ["Next.js", "Tailwind", "Shadcn UI", "Agency Site"],
   },
 ];
 

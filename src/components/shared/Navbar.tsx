@@ -19,11 +19,11 @@ declare global {
 }
 
 const navItems = [
-  { name: "Home", href: "#", icon: Home },
-  { name: "About", href: "#about", icon: User },
-  { name: "Skills", href: "#skills", icon: Code },
-  { name: "Projects", href: "#projects", icon: Briefcase },
-  { name: "Contact", href: "#contact", icon: Mail },
+  { name: "Home", href: "/#", icon: Home },
+  { name: "About", href: "/#about", icon: User },
+  { name: "Skills", href: "/#skills", icon: Code },
+  { name: "Projects", href: "/#projects", icon: Briefcase },
+  { name: "Contact", href: "/#contact", icon: Mail },
 ];
 
 export default function Navbar(): JSX.Element {
@@ -97,7 +97,7 @@ export default function Navbar(): JSX.Element {
           >
             Abu Rayhan
           </motion.div>
-          </Link>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
