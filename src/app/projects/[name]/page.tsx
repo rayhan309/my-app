@@ -19,15 +19,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProjectPage({ params }: PageProps) {
   const { name } = await params;
-  const project = singleProjectDitails(name);
+  const project : any = singleProjectDitails(name);
 
   if (!project) {
     notFound();
-  }
+  };
 
   return (
     <div className="container mx-auto min-h-[calc(100vh-5rem)] px-4 pt-6">
       <ProjectDetails project={project} />
     </div>
   );
-}
+};

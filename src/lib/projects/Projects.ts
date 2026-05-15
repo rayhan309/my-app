@@ -651,7 +651,7 @@ export const AllprojectsDitails = [
   title: "Zorin: AI Autonomous Agent",
   subtitle: "Self-Evolving Automation & Intelligence Engine",
   description: "Zorin is a sophisticated Python-based autonomous agent designed to execute complex tasks with minimal human intervention. By leveraging Large Language Models (LLMs) and advanced chain-of-thought reasoning, it can analyze data, browse the web, and perform automated workflows intelligently.",
-  image: "/zorin_ai_preview.png", // Use the logo we generated
+  image: "/ai_agent_preview.png", // Use the logo we generated
   liveLink: null,
   githubLink: "https://github.com/rayhan309",
   
