@@ -1,11 +1,13 @@
-import { BarChart3, Code2, Cpu, LucideIcon, Megaphone, ShieldCheck, Workflow } from "lucide-react";
+import { BarChart3, Code2, Cpu, LucideIcon, Megaphone, Package, ShieldCheck, Workflow } from "lucide-react";
 
-export const SERVICESDATA: {
+export interface Service {
     title: string;
     description: string;
     icon: LucideIcon;
     tags: string[];
-}[] = [
+}
+
+export const SERVICESDATA: Service[] = [
     {
       title: "Fullstack Development",
       description:
@@ -48,13 +50,13 @@ export const SERVICESDATA: {
       icon: Megaphone,
       tags: ["Meta", "Google", "Analytics"],
     },
-    // {
-    //   title: "Dropshipping",
-    //   description:
-    //     "Store builds, supplier workflows, and ops playbooks focused on conversion, fulfilment, and sustainable margins.",
-    //   icon: Package,
-    //   tags: ["E-commerce", "Ops"],
-    // },
+    {
+      title: "Dropshipping",
+      description:
+        "Store builds, supplier workflows, and ops playbooks focused on conversion, fulfilment, and sustainable margins.",
+      icon: Package,
+      tags: ["E-commerce", "Ops"],
+    },
   ] satisfies {
     title: string;
     description: string;

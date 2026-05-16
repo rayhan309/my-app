@@ -1,65 +1,131 @@
 "use client";
 
-import React, { useRef, useMemo, JSX } from "react";
+import React, { useRef, useMemo, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { Points, PointMaterial } from "@react-three/drei";
 import { useTheme } from "next-themes";
 
-function Particles(): JSX.Element {
-  const ref = useRef<THREE.Points>(null!);
+function NeuralNetwork(): React.JSX.Element {
   const { theme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
+  const [mounted, setMounted] = useState(false);
+  const mouse = useRef(new THREE.Vector2(0, 0));
+  const groupRef = useRef<THREE.Group>(null!);
 
-  React.useEffect(() => {
+  const count = 100;
+  const maxDistance = 1.2;
+
+  useEffect(() => {
     setMounted(true);
+    const handleMouseMove = (event: MouseEvent) => {
+      mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  const sphere = useMemo(() => {
-    const positions = new Float32Array(8000 * 3);
-    for (let i = 0; i < 8000; i++) {
-      const r = 1.5;
-      const theta = 2 * Math.PI * Math.random();
-      const phi = Math.acos(2 * Math.random() - 1);
-      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = r * Math.cos(phi);
+  const { particles, lines } = useMemo(() => {
+    const tempParticles = new Float32Array(count * 3);
+    const velocities = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+      tempParticles[i * 3] = (Math.random() - 0.5) * 5;
+      tempParticles[i * 3 + 1] = (Math.random() - 0.5) * 5;
+      tempParticles[i * 3 + 2] = (Math.random() - 0.5) * 2;
+
+      velocities[i * 3] = (Math.random() - 0.5) * 0.005;
+      velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.005;
+      velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.005;
     }
-    return positions;
+
+    return {
+      particles: tempParticles,
+      velocities,
+      lines: new THREE.BufferGeometry()
+    };
   }, []);
 
-  useFrame((state, delta) => {
-    if (!ref.current) return;
-    ref.current.rotation.x -= delta / 15;
-    ref.current.rotation.y -= delta / 20;
+  const pointsRef = useRef<THREE.Points>(null!);
+  const linesRef = useRef<THREE.LineSegments>(null!);
+
+  useFrame((state) => {
+    if (!mounted) return;
+    const { clock } = state;
+    const time = clock.getElapsedTime();
+
+    const pos = pointsRef.current.geometry.attributes.position.array as Float32Array;
+    const linePos = [];
+
+    // Subtle parallax
+    groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, mouse.current.x * 0.2, 0.05);
+    groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, mouse.current.y * 0.2, 0.05);
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+
+      // Gentle floating motion
+      pos[i3] += Math.sin(time * 0.5 + i) * 0.001;
+      pos[i3 + 1] += Math.cos(time * 0.4 + i) * 0.001;
+
+      // Check distances for lines
+      for (let j = i + 1; j < count; j++) {
+        const j3 = j * 3;
+        const dx = pos[i3] - pos[j3];
+        const dy = pos[i3 + 1] - pos[j3 + 1];
+        const dz = pos[i3 + 2] - pos[j3 + 2];
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (dist < maxDistance) {
+          linePos.push(pos[i3], pos[i3 + 1], pos[i3 + 2]);
+          linePos.push(pos[j3], pos[j3 + 1], pos[j3 + 2]);
+        }
+      }
+    }
+
+    pointsRef.current.geometry.attributes.position.needsUpdate = true;
+    linesRef.current.geometry.setAttribute('position', new THREE.Float32BufferAttribute(linePos, 3));
   });
 
-  if (!mounted) return <group />;
-
-  // theme matching colors
-  const particleColor = theme === "dark" ? "#93c5fd" : "#2563eb";
+  const color = theme === "dark" ? "#60a5fa" : "#2563eb";
 
   return (
-    <group rotation={[0, 0, Math.PI / 4]}>
-      <Points ref={ref} positions={sphere} stride={3} frustumCulled={false}>
-        <PointMaterial
+    <group ref={groupRef}>
+      <points ref={pointsRef}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={count}
+            array={particles}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial
+          size={0.06}
+          color={color}
           transparent
-          color={particleColor}
-          size={0.008}
+          opacity={0.6}
           sizeAttenuation={true}
-          depthWrite={false}
-          opacity={theme === "dark" ? 0.3 : 0.4}
         />
-      </Points>
+      </points>
+
+      <lineSegments ref={linesRef}>
+        <bufferGeometry />
+        <lineBasicMaterial
+          color={color}
+          transparent
+          opacity={0.15}
+          linewidth={1}
+        />
+      </lineSegments>
     </group>
   );
 }
 
-export default function Background3D(): JSX.Element {
+export default function Background3D(): React.JSX.Element {
   return (
-    <div className="fixed inset-0 -z-20 pointer-events-none transition-opacity duration-500">
-      <Canvas camera={{ position: [0, 0, 1] }}>
-        <Particles />
+    <div className="fixed inset-0 -z-20 pointer-events-none transition-opacity duration-500 overflow-hidden">
+      <Canvas camera={{ position: [0, 0, 3], fov: 75 }}>
+        <NeuralNetwork />
       </Canvas>
     </div>
   );

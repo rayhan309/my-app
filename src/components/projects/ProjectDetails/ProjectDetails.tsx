@@ -122,7 +122,7 @@ export default function ProjectDetails({ project }: { project: ProjectDetailData
           ].map(({ icon: Icon, label, value }) => (
             <div
               key={label}
-              className="rounded-md border border-border/40 bg-card/50 p-4 backdrop-blur-sm"
+              className="rounded-md border border-border/40 bg-card/40 p-4 backdrop-blur-sm"
             >
               <Icon className="w-4 h-4 text-primary mb-2" />
               <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wide">
@@ -136,19 +136,19 @@ export default function ProjectDetails({ project }: { project: ProjectDetailData
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
         <div className="lg:col-span-2 space-y-8">
-          <section className="rounded-md border border-border/20 bg-card/30 p-6 sm:p-8">
+          <section className="rounded-md border border-border/20 bg-card/50 p-6 sm:p-8">
             <h2 className={`text-xl font-black mb-4 ${jakarta.className}`}>About</h2>
             <p className="text-muted-foreground leading-relaxed">{project.description}</p>
           </section>
 
-          <section className="rounded-md border border-border/20 bg-card/30 p-6 sm:p-8">
+          <section className="rounded-md border border-border/20 bg-card/50 p-6 sm:p-8">
             <h2 className={`text-xl font-black mb-4 ${jakarta.className}`}>
               Challenge & approach
             </h2>
             <p className="text-muted-foreground leading-relaxed">{project.overview}</p>
           </section>
 
-          <section className="rounded-md border border-border/20 bg-card/30 p-6 sm:p-8">
+          <section className="rounded-md border border-border/20 bg-card/50 p-6 sm:p-8">
             <h2 className={`text-xl font-black mb-6 ${jakarta.className}`}>Key features</h2>
             <ul className="grid sm:grid-cols-2 gap-4">
               {project.features.map((item, i) => (
@@ -167,7 +167,7 @@ export default function ProjectDetails({ project }: { project: ProjectDetailData
         </div>
 
         <aside>
-          <div className="rounded-md border border-border/20 bg-card/30 p-6 sm:p-8 lg:sticky lg:top-24 space-y-6">
+          <div className="rounded-md border border-border/20 bg-card/50 p-6 sm:p-8 lg:sticky lg:top-24 space-y-6">
             <h2 className={`text-lg font-black ${jakarta.className}`}>Tech stack</h2>
             {stackGroups.map((group) => (
               <div key={group.title}>
@@ -196,7 +196,7 @@ export default function ProjectDetails({ project }: { project: ProjectDetailData
           {gallery.map((src, i) => (
             <div
               key={`${src}-${i}`}
-              className="relative aspect-video rounded-md overflow-hidden border border-border/30 bg-card/20"
+              className="relative aspect-video rounded-md overflow-hidden border border-border/30 bg-card/30"
             >
               <Image
                 src={src}

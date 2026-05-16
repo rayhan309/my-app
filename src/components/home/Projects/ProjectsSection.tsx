@@ -62,8 +62,8 @@ export default function ProjectsSection() {
           viewport={{ once: true }}
           className="flex justify-center mt-16"
         >
-          <Link href="/projects" className="px-10 py-4 bg-transparent border border-border hover:border-primary/50 text-foreground rounded-md font-bold transition-all hover:bg-primary/5 group">
-            See More Projects
+          <Link href="/projects" className="px-10 py-4 bg-transparent bg-card/50 backdrop-blur-sm border border-border hover:border-primary/50 text-foreground rounded-md font-bold transition-all hover:bg-primary/5 group">
+            More Projects
             <motion.span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">
               →
             </motion.span>

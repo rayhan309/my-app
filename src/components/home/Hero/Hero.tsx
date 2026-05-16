@@ -55,14 +55,19 @@ export default function Hero() {
             </div>
 
             <div className="flex flex-wrap gap-4 pt-4">
-              <motion.button
+              <Link
+              // navigate to whats app
+                href="https://wa.me/8801621807642?text=Hi! I'm interested in working with you."
+                target="_blank"
                 // whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                // 
+                // onClick={() => window.location.href = "/contact"}
+                // whileTap={{ scale: 0.95 }}
                 className="bg-primary text-primary-foreground px-8 py-4 rounded-full font-bold shadow-lg shadow-primary/20 flex items-center gap-2 group transition-all cursor-pointer"
               >
                 Let's Talk
                 <RiArrowRightLongFill className="w-5 h-5 group-hover:translate-x-2 duration-500 ease-in-out opacity-50 transition-transform" />
-              </motion.button>
+              </Link>
               <motion.button
                 // whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -97,7 +102,7 @@ export default function Hero() {
           >
             <div className="relative z-10 w-full max-w-[500px] mx-auto aspect-square rounded-md overflow-hidden shadow-2xl border border-white/10">
               <Image
-                src="/Beauty_of_eyes.jpeg"
+                src="/rayhan.jpeg"
                 alt="Abu Rayhan"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
