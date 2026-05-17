@@ -102,7 +102,7 @@ export default function Hero() {
           >
             <div className="relative z-10 w-full max-w-[500px] mx-auto aspect-square rounded-md overflow-hidden shadow-2xl border border-white/10">
               <Image
-                src="/rayhan.jpeg"
+                src="/Beauty_of_eyes.jpeg"
                 alt="Abu Rayhan"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-110"

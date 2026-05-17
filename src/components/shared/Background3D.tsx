@@ -92,7 +92,7 @@ function NeuralNetwork(): React.JSX.Element {
     <group ref={groupRef}>
       <points ref={pointsRef}>
         <bufferGeometry>
-          <bufferAttribute
+          <bufferAttribute 
             attach="attributes-position"
             count={count}
             array={particles}
