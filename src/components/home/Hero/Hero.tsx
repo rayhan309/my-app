@@ -70,6 +70,7 @@ export default function Hero() {
               </Link>
               <motion.button
                 // whileHover={{ scale: 1.05 }}
+                onClick={() => window.location.href = "/projects"}
                 whileTap={{ scale: 0.95 }}
                 className="border border-border bg-card/50 backdrop-blur-sm px-8 py-4 rounded-full font-bold hover:bg-muted transition-all cursor-pointer"
               >
