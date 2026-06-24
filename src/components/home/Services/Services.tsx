@@ -1,88 +1,62 @@
 "use client";
 
 import { JSX } from "react";
-import { motion } from "framer-motion";
-import { Plus_Jakarta_Sans } from "next/font/google";
-import Link from "next/link";
-import {
-  ArrowRight,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { SERVICESDATA } from "@/lib/ServicesData/ServicesData";
 import ServiceCard from "./ServiceCard";
-
-const jakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta-sans",
-});
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 const SERVICES = SERVICESDATA.slice(0, 6);
 
-
-
 export default function Services(): JSX.Element {
   return (
-    <section id="services" className="py-20 relative overflow-hidden scroll-mt-24">
-      <div className="absolute top-1/2 left-0 w-px h-32 bg-gradient-to-b from-transparent via-primary/20 to-transparent hidden md:block" />
+    <Box component="section" id="services" data-reveal sx={{ py: 10, position: "relative", overflow: "hidden" }}>
+      <Box className="container mx-auto px-4">
+        <SectionHeading
+          eyebrow="What I deliver"
+          title={
+            <>
+              Services <Box component="span" sx={{ color: "text.secondary" }}>&amp; capabilities.</Box>
+            </>
+          }
+          description="Engineering-first solutions with clear outcomes—whether you need a product built, secured, scaled, or grown."
+        />
 
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col items-center text-center mb-16 space-y-4 max-w-3xl mx-auto">
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-primary font-semibold tracking-wider uppercase text-sm"
-          >
-            What I deliver
-          </motion.span>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.08 }}
-            className={`text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] ${jakartaSans.className}`}
-          >
-            Services <span className="text-muted-foreground">&amp; capabilities.</span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.16 }}
-            className="text-lg text-muted-foreground"
-          >
-            Engineering-first solutions with clear outcomes—whether you need a
-            product built, secured, scaled, or grown.
-          </motion.p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
+        <Grid container spacing={3}>
           {SERVICES.map((service, index) => (
-            <ServiceCard key={service.title} service={service} index={index} />
+            <Grid key={service.title} size={{ xs: 12, md: 6, xl: 4 }}>
+              <ServiceCard service={service} index={index} />
+            </Grid>
           ))}
-        </div>
+        </Grid>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-16"
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          sx={{ mt: 8, justifyContent: "center", alignItems: "center" }}
         >
-          <Link
+          <Button
+            variant="contained"
             href="/booking-meeting"
-            className="inline-flex items-center gap-2 bg-primary/70 text-primary-foreground px-8 py-4 rounded-full text-sm font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity"
+            component="a"
+            endIcon={<ArrowRight size={16} />}
           >
             Discuss a project
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-          <Link
+          </Button>
+          <Button
+            variant="outlined"
             href="/services"
-            className="group inline-flex items-center gap-2 border border-border px-8 py-4 rounded-full text-sm font-bold hover:border-primary/50 hover:bg-primary/5 transition-all"
+            component="a"
+            endIcon={<ArrowRight size={16} />}
           >
             View all Services
-            <ArrowRight className="w-4 h-4 opacity-60 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </motion.div>
-      </div>
-    </section>
+          </Button>
+        </Stack>
+      </Box>
+    </Box>
   );
 }

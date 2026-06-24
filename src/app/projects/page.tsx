@@ -1,10 +1,10 @@
 import ProjectCard from "@/components/projects/ProjectCard/ProjectCard";
-import { Allprojects } from "@/lib/projects/Projects";
+import { getMergedProjects } from "@/lib/projects/get-projects";
 import PageHeader from "@/components/projects/PageHeaders/PageHeaders";
 import FinalSection from "@/components/home/FinalSection/FinalSection";
 
-export default function ProjectsPage() {
-  const projects = Allprojects;
+export default async function ProjectsPage() {
+  const projects = await getMergedProjects();
 
   return (
     <div className="container mx-auto px-4 min-h-[calc(100vh-5rem)]">
@@ -12,8 +12,8 @@ export default function ProjectsPage() {
       <div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
       >
-        {projects.map((project: any, index: number) => (
-          <ProjectCard key={index} project={project} index={index} />
+        {projects.map((project, index) => (
+          <ProjectCard key={project.id} project={project} index={index} />
         ))}
       </div>
 

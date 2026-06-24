@@ -25,6 +25,7 @@ export type BookingDocument = {
   notes: string;
   appointmentAt: Date;
   createdAt: Date;
+  marked?: boolean;
 };
 
 function isValidEmail(email: string): boolean {

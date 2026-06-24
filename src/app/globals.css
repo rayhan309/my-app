@@ -60,10 +60,42 @@ body {
   color: var(--foreground);
   font-family: var(--font-inter), sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
 }
 
 html {
   view-transition-name: root;
+}
+
+html.smooth-scroll-active,
+html.smooth-scroll-active body {
+  overflow: hidden;
+  height: 100%;
+}
+
+#smooth-wrapper {
+  width: 100%;
+}
+
+#smooth-wrapper,
+#smooth-content,
+main {
+  background: transparent;
+}
+
+#smooth-content {
+  will-change: transform;
+}
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(3rem);
+  will-change: transform, opacity;
 }
 
 /* Theme Transition Animation */

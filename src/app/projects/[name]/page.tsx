@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProjectDetails from "@/components/projects/ProjectDetails/ProjectDetails";
-import { singleProjectDitails } from "@/lib/projects/Projects";
+import { getProjectDetailById } from "@/lib/projects/get-projects";
 
 type PageProps = {
   params: Promise<{ name: string }>;
@@ -9,7 +9,7 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { name } = await params;
-  const project = singleProjectDitails(name);
+  const project = await getProjectDetailById(name);
   if (!project) return { title: "Project not found" };
   return {
     title: project.title,
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProjectPage({ params }: PageProps) {
   const { name } = await params;
-  const project : any = singleProjectDitails(name);
+  const project = await getProjectDetailById(name);
 
   if (!project) {
     notFound();

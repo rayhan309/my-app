@@ -121,7 +121,7 @@ function NeuralNetwork(): React.JSX.Element {
 
 export default function Background3D(): React.JSX.Element {
   return (
-    <div className="fixed inset-0 -z-20 pointer-events-none transition-opacity duration-500 overflow-hidden">
+    <div className="fixed inset-0 z-0 pointer-events-none transition-opacity duration-500 overflow-hidden">
       <Canvas camera={{ position: [0, 0, 3], fov: 75 }}>
         <NeuralNetwork />
       </Canvas>

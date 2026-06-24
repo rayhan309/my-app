@@ -71,11 +71,9 @@ export const metadata: Metadata = {
   },
 };
 
-import Navbar from "@/components/shared/Navbar";
-import CustomCursor from "@/components/shared/CustomCursor";
+import AppChrome from "@/components/shared/AppChrome";
 import { ThemeProvider } from "@/providers/theme-provider";
-import Background3D from "@/components/shared/Background3D";
-import OverlayPattern from "@/components/shared/OverlayPattern";
+import MuiProvider from "@/providers/mui-provider";
 import QueryProvider from "@/providers/query-provider";
 
 export default function RootLayout({
@@ -98,23 +96,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <QueryProvider>
-            {/* custom cursor */}
-            <CustomCursor />
-            {/* 3D Background */}
-            <Background3D />
-            
-            {/* Overlay Pattern */}
-            <OverlayPattern />
-
-            {/* navbar */}
-            <Navbar />
-
-            {/* main */}
-            <main className="pt-20">
-              {children}
-            </main>
-          </QueryProvider>
+          <MuiProvider>
+            <QueryProvider>
+              <AppChrome>{children}</AppChrome>
+            </QueryProvider>
+          </MuiProvider>
         </ThemeProvider>
 
       </body>

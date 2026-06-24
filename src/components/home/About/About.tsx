@@ -36,7 +36,7 @@ const features = [
 
 export default function About() {
   return (
-    <section id="about" className="py-24 relative overflow-hidden">
+    <section id="about" data-reveal className="py-24 relative overflow-hidden">
       {/* Background Subtle Gradient */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       
