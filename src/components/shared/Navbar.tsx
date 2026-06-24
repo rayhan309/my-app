@@ -220,12 +220,14 @@ export default function Navbar(): JSX.Element {
         anchor="right"
         open={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
-        PaperProps={{
-          sx: {
-            width: 300,
-            bgcolor: "background.paper",
-            borderLeft: 1,
-            borderColor: "divider",
+        slotProps={{
+          paper: {
+            sx: {
+              width: 300,
+              bgcolor: "background.paper",
+              borderLeft: 1,
+              borderColor: "divider",
+            },
           },
         }}
       >

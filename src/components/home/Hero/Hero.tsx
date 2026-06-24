@@ -37,7 +37,7 @@ const fadeInRight = {
     opacity: 1,
     scale: 1,
     rotate: 0,
-    transition: { duration: 1, delay: 0.15, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 1, delay: 0.15, ease: [0.22, 1, 0.36, 1] as const },
   },
 };
 
@@ -176,12 +176,11 @@ export default function Hero() {
           </Grid>
 
           <Grid size={{ xs: 12, lg: 6 }} sx={{ order: { xs: 1, lg: 2 } }}>
-            <Box
-              component={motion.div}
+            <motion.div
               variants={fadeInRight}
               initial="hidden"
               animate="visible"
-              sx={{ position: "relative", maxWidth: 500, mx: "auto" }}
+              style={{ position: "relative", maxWidth: 500, margin: "0 auto" }}
             >
               <Paper
                 elevation={0}
@@ -215,16 +214,19 @@ export default function Hero() {
                 />
               </Paper>
 
-              <Paper
-                component={motion.div}
+              <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                elevation={0}
-                sx={{
-                  display: { xs: "none", md: "block" },
+                className="hidden md:block"
+                style={{
                   position: "absolute",
                   top: -16,
                   right: -16,
+                }}
+              >
+              <Paper
+                elevation={0}
+                sx={{
                   p: 2,
                   minWidth: 180,
                 }}
@@ -253,7 +255,8 @@ export default function Hero() {
                   </Box>
                 </Stack>
               </Paper>
-            </Box>
+              </motion.div>
+            </motion.div>
           </Grid>
         </Grid>
       </Box>

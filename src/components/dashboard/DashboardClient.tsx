@@ -314,9 +314,7 @@ export default function DashboardClient() {
                                 marked: checked,
                               })
                             }
-                            inputProps={{
-                              "aria-label": `Mark booking for ${booking.name}`,
-                            }}
+                            aria-label={`Mark booking for ${booking.name}`}
                           />
                         </TableCell>
                         <TableCell>
