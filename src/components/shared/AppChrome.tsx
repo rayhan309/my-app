@@ -5,6 +5,7 @@ import Navbar from "@/components/shared/Navbar";
 import CustomCursor from "@/components/shared/CustomCursor";
 import Background3D from "@/components/shared/Background3D";
 import OverlayPattern from "@/components/shared/OverlayPattern";
+import PageLoadIntro from "@/components/shared/PageLoadIntro";
 import SmoothScroll from "@/components/shared/SmoothScroll";
 
 export default function AppChrome({
@@ -21,6 +22,7 @@ export default function AppChrome({
 
   return (
     <>
+      <PageLoadIntro />
       <CustomCursor />
       <Background3D />
       <OverlayPattern />

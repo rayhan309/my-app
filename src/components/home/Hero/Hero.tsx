@@ -31,13 +31,16 @@ const fadeUp = {
   }),
 };
 
-const fadeInRight = {
-  hidden: { opacity: 0, scale: 0.94, rotate: 3 },
+const pullDown = {
+  hidden: { opacity: 0, y: -160 },
   visible: {
     opacity: 1,
-    scale: 1,
-    rotate: 0,
-    transition: { duration: 1, delay: 0.15, ease: [0.22, 1, 0.36, 1] as const },
+    y: 0,
+    transition: {
+      duration: 0.48,
+      delay: 2.1,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
   },
 };
 
@@ -177,7 +180,7 @@ export default function Hero() {
 
           <Grid size={{ xs: 12, lg: 6 }} sx={{ order: { xs: 1, lg: 2 } }}>
             <motion.div
-              variants={fadeInRight}
+              variants={pullDown}
               initial="hidden"
               animate="visible"
               style={{ position: "relative", maxWidth: 500, margin: "0 auto" }}
@@ -196,10 +199,11 @@ export default function Hero() {
                 }}
               >
                 <Image
-                  src="/Beauty_of_eyes.jpeg"
-                  alt="Abu Rayhan"
+                  src="/hero-rayhan.png"
+                  alt="Abu Rayhan at workstation"
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  sizes="(max-width: 1024px) 90vw, 500px"
+                  className="object-cover object-[30%_20%] transition-transform duration-700 group-hover:scale-110"
                   priority
                 />
                 <Box
