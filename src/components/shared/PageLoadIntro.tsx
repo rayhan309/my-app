@@ -99,10 +99,10 @@ export default function PageLoadIntro() {
             mouseControls: false,
             touchControls: false,
             gyroControls: false,
-            highlightColor: 0x000000,
-            midtoneColor: 0x000000,
-            lowlightColor: 0x000000,
-            baseColor: 0x732f89,
+            highlightColor: 0x0f172a, // --card (dark)
+            midtoneColor: 0x1e293b, // --border / --muted (dark)
+            lowlightColor: 0x020617, // --background (dark)
+            baseColor: 0x3b82f6, // --primary (dark) matches theme accent blue
             blurFactor: 0.6,
             zoom: 1,
             speed: 1,
@@ -117,8 +117,8 @@ export default function PageLoadIntro() {
             touchControls: true,
             gyroControls: false,
             backgroundAlpha: 0,
-            color1: 0xeb0096,
-            color2: 3953239,
+            color1: 0x3b82f6, // --primary / --accent (dark theme)
+            color2: 0x60a5fa, // lighter accent tone used in Background3D
             quantity: 5,
             birdSize: 1,
             wingSpan: 40,
@@ -169,7 +169,7 @@ export default function PageLoadIntro() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#000",
+        background: "var(--background)",
         opacity: hiding ? 0 : 1,
         visibility: hiding ? "hidden" : "visible",
         pointerEvents: hiding ? "none" : "auto",
