@@ -32,6 +32,7 @@ import Divider from "@mui/material/Divider";
 import { gsap, registerGsapPlugins } from "@/lib/gsap";
 import { getScrollY, scrollToHash } from "@/lib/smooth-scroll";
 
+
 registerGsapPlugins();
 
 declare global {
