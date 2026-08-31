@@ -1,21 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, JSX } from "react";
-import { flushSync } from "react-dom";
-import {
-  Home,
-  User,
-  Code,
-  Briefcase,
-  Mail,
-  Menu,
-  X,
-  Sun,
-  Moon,
-  Send,
-} from "lucide-react";
-import { useTheme } from "next-themes";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import Container from "@/components/shared/Container";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
@@ -26,42 +14,25 @@ import Typography from "@mui/material/Typography";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import { gsap, registerGsapPlugins } from "@/lib/gsap";
 import { getScrollY, scrollToHash } from "@/lib/smooth-scroll";
 
-
 registerGsapPlugins();
 
-declare global {
-  interface Document {
-    startViewTransition(callback: () => void): {
-      ready: Promise<void>;
-      finished: Promise<void>;
-      updateCallbackDone: Promise<void>;
-    };
-  }
-}
-
 const navItems = [
-  { name: "Home", href: "/#", icon: Home },
-  { name: "About", href: "/#about", icon: User },
-  { name: "Skills", href: "/#skills", icon: Code },
-  { name: "Projects", href: "/#projects", icon: Briefcase },
-  { name: "Contact", href: "/#contact", icon: Mail },
+  { name: "Work", href: "/#projects" },
+  { name: "About", href: "/#about" },
+  { name: "Services", href: "/#services" },
+  { name: "Contact", href: "/#contact" },
 ];
 
 export default function Navbar(): JSX.Element {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-
     const updateScrolled = () => {
       setScrolled(getScrollY() > 20);
     };
@@ -89,48 +60,6 @@ export default function Navbar(): JSX.Element {
     setMobileMenuOpen(false);
   };
 
-  const toggleTheme = (e: React.MouseEvent) => {
-    if (
-      !document.startViewTransition ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      setTheme(theme === "dark" ? "light" : "dark");
-      return;
-    }
-
-    const x = e.clientX;
-    const y = e.clientY;
-    const endRadius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y)
-    );
-
-    const nextTheme = theme === "dark" ? "light" : "dark";
-
-    const transition = document.startViewTransition(() => {
-      flushSync(() => {
-        setTheme(nextTheme);
-      });
-    });
-
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`,
-          ],
-        },
-        {
-          duration: 500,
-          easing: "ease-in-out",
-          fill: "forwards",
-          pseudoElement: "::view-transition-new(root)",
-        }
-      );
-    });
-  };
-
   return (
     <>
       <AppBar
@@ -141,20 +70,19 @@ export default function Navbar(): JSX.Element {
           borderBottom: scrolled ? 1 : 0,
           borderColor: "divider",
           bgcolor: scrolled ? "background.paper" : "transparent",
-          py: scrolled ? 0.25 : 0.75,
-          transition: "all 0.3s ease",
+          py: 0.5,
+          transition: "background-color 0.3s ease, border-color 0.3s ease",
         }}
       >
-        <Box className="container mx-auto px-4">
-          <Toolbar disableGutters sx={{ justifyContent: "space-between", gap: 2 }}>
+        <Container>
+          <Toolbar disableGutters sx={{ justifyContent: "space-between", minHeight: 72 }}>
             <Link href="/" style={{ textDecoration: "none" }}>
               <Typography
-                variant="h6"
+                className="font-display"
                 sx={{
-                  fontWeight: 800,
-                  background: "linear-gradient(90deg, #3b82f6, #8b5cf6)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
+                  fontSize: "1.45rem",
+                  color: "text.primary",
+                  lineHeight: 1,
                 }}
               >
                 Abu Rayhan
@@ -163,7 +91,7 @@ export default function Navbar(): JSX.Element {
 
             <Stack
               direction="row"
-              spacing={1}
+              spacing={0.5}
               sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}
             >
               {navItems.map((item) => (
@@ -175,36 +103,29 @@ export default function Navbar(): JSX.Element {
                     handleNavClick(e, item.href)
                   }
                   color="inherit"
-                  startIcon={<item.icon size={16} />}
                   sx={{
                     color: "text.secondary",
-                    fontWeight: 600,
-                    "&:hover": { color: "text.primary", bgcolor: "action.hover" },
+                    fontWeight: 500,
+                    px: 1.5,
+                    "&:hover": { color: "text.primary", bgcolor: "transparent" },
                   }}
                 >
                   {item.name}
                 </Button>
               ))}
 
-              <IconButton onClick={toggleTheme} color="inherit" aria-label="Toggle theme">
-                {mounted && (theme === "dark" ? <Sun size={20} /> : <Moon size={20} />)}
-              </IconButton>
-
               <Button
                 variant="contained"
                 color="primary"
-                startIcon={<Send size={16} />}
                 href="/booking-meeting"
                 component="a"
+                sx={{ ml: 1 }}
               >
-                Book a Meeting
+                Book a call
               </Button>
             </Stack>
 
-            <Stack direction="row" spacing={1} sx={{ display: { xs: "flex", md: "none" } }}>
-              <IconButton onClick={toggleTheme} color="inherit" aria-label="Toggle theme">
-                {mounted && (theme === "dark" ? <Sun size={20} /> : <Moon size={20} />)}
-              </IconButton>
+            <Stack direction="row" spacing={0.5} sx={{ display: { xs: "flex", md: "none" } }}>
               <IconButton
                 onClick={() => setMobileMenuOpen(true)}
                 color="inherit"
@@ -214,7 +135,7 @@ export default function Navbar(): JSX.Element {
               </IconButton>
             </Stack>
           </Toolbar>
-        </Box>
+        </Container>
       </AppBar>
 
       <Drawer
@@ -225,15 +146,15 @@ export default function Navbar(): JSX.Element {
           paper: {
             sx: {
               width: 300,
-              bgcolor: "background.paper",
+              bgcolor: "background.default",
               borderLeft: 1,
               borderColor: "divider",
             },
           },
         }}
       >
-        <Box sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+        <Box sx={{ p: 2.5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography className="font-display" sx={{ fontSize: "1.35rem" }}>
             Menu
           </Typography>
           <IconButton onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
@@ -241,7 +162,7 @@ export default function Navbar(): JSX.Element {
           </IconButton>
         </Box>
         <Divider />
-        <List sx={{ px: 1, py: 2 }}>
+        <List sx={{ px: 1.5, py: 2 }}>
           {navItems.map((item) => (
             <ListItemButton
               key={item.name}
@@ -250,24 +171,18 @@ export default function Navbar(): JSX.Element {
               onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
                 handleNavClick(e, item.href)
               }
-              sx={{ borderRadius: 2, mb: 0.5 }}
+              sx={{ borderRadius: 1.5, mb: 0.5, py: 1.4 }}
             >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <item.icon size={20} />
-              </ListItemIcon>
-              <ListItemText primary={item.name} />
+              <ListItemText
+                primary={item.name}
+                slotProps={{ primary: { sx: { fontSize: "1.05rem" } } }}
+              />
             </ListItemButton>
           ))}
         </List>
-        <Box sx={{ p: 2 }}>
-          <Button
-            fullWidth
-            variant="contained"
-            href="/booking-meeting"
-            component="a"
-            startIcon={<Send size={16} />}
-          >
-            Book a Meeting
+        <Box sx={{ p: 2.5 }}>
+          <Button fullWidth variant="contained" href="/booking-meeting" component="a">
+            Book a call
           </Button>
         </Box>
       </Drawer>

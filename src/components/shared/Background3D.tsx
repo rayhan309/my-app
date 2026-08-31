@@ -1,13 +1,10 @@
 "use client";
 
-import React, { useRef, useMemo, useState, useEffect } from "react";
+import React, { useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { useTheme } from "next-themes";
 
 function NeuralNetwork(): React.JSX.Element {
-  const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const mouse = useRef(new THREE.Vector2(0, 0));
   const groupRef = useRef<THREE.Group>(null!);
 
@@ -15,7 +12,6 @@ function NeuralNetwork(): React.JSX.Element {
   const maxDistance = 1.2;
 
   useEffect(() => {
-    setMounted(true);
     const handleMouseMove = (event: MouseEvent) => {
       mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -49,7 +45,7 @@ function NeuralNetwork(): React.JSX.Element {
   const linesRef = useRef<THREE.LineSegments>(null!);
 
   useFrame((state) => {
-    if (!mounted) return;
+    if (!pointsRef.current || !linesRef.current || !groupRef.current) return;
     const { clock } = state;
     const time = clock.getElapsedTime();
 
@@ -86,7 +82,7 @@ function NeuralNetwork(): React.JSX.Element {
     linesRef.current.geometry.setAttribute('position', new THREE.Float32BufferAttribute(linePos, 3));
   });
 
-  const color = theme === "dark" ? "#60a5fa" : "#2563eb";
+  const color = "#e4c9a0";
 
   return (
     <group ref={groupRef}>

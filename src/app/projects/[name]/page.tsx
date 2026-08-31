@@ -26,7 +26,7 @@ export default async function ProjectPage({ params }: PageProps) {
   };
 
   return (
-    <div className="container mx-auto min-h-[calc(100vh-5rem)] px-4 pt-6">
+    <div className="min-h-[calc(100vh-5rem)] pt-8">
       <ProjectDetails project={project} />
     </div>
   );

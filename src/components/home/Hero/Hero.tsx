@@ -4,266 +4,190 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { RiArrowRightLongFill } from "react-icons/ri";
+import { ArrowUpRight } from "lucide-react";
 import { FaFacebook, FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
-import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
 import TypingRotator from "@/components/home/Hero/TypingRotator";
 
-const jakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta-sans",
-});
-
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 20 },
   visible: (delay = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const },
   }),
 };
 
-const pullDown = {
-  hidden: { opacity: 0, y: -160 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.48,
-      delay: 2.1,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
+const socialLinks = [
+  { href: "https://github.com/rayhan309", label: "GitHub", Icon: FaGithub },
+  {
+    href: "https://www.linkedin.com/in/abu-rayhan-undefined-2514b5390/",
+    label: "LinkedIn",
+    Icon: FaLinkedin,
   },
-};
+  { href: "https://x.com/AbuRayhan1818", label: "X", Icon: FaTwitter },
+  { href: "https://facebook.com/aburayhan1818/", label: "Facebook", Icon: FaFacebook },
+];
 
 export default function Hero() {
-  const socialLinks: {
-    href: string;
-    Icon: React.ComponentType<{ className?: string }>;
-  }[] = [
-    { href: "https://github.com/rayhan309", Icon: FaGithub },
-    {
-      href: "https://www.linkedin.com/in/abu-rayhan-undefined-2514b5390/",
-      Icon: FaLinkedin,
-    },
-    { href: "https://x.com/AbuRayhan1818", Icon: FaTwitter },
-    { href: "https://facebook.com/aburayhan1818/", Icon: FaFacebook },
-  ];
-
   return (
-    <Box component="section" sx={{ position: "relative", pt: 5, pb: 10 }}>
-      <Box className="container mx-auto px-4">
-        <Grid container spacing={6} sx={{ alignItems: "center" }}>
-          <Grid size={{ xs: 12, lg: 6 }} sx={{ order: { xs: 2, lg: 1 } }}>
-            <motion.div initial="hidden" animate="visible">
-            <Stack spacing={3}>
+    <Box
+      component="section"
+      sx={{
+        position: "relative",
+        pt: { xs: 4, md: 8 },
+        pb: { xs: 10, md: 16 },
+      }}
+    >
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", lg: "1.15fr 0.85fr" },
+          gap: { xs: 7, lg: 10 },
+          alignItems: "center",
+        }}
+      >
+          <motion.div initial="hidden" animate="visible">
+            <Stack spacing={3.5}>
               <motion.div variants={fadeUp} custom={0}>
-                <Chip
-                  label="Available for New Projects"
-                  color="primary"
-                  variant="outlined"
-                  icon={
-                    <Box
-                      sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        bgcolor: "primary.main",
-                        boxShadow: "0 0 0 4px rgba(59,130,246,0.18)",
-                      }}
-                    />
-                  }
-                  sx={{ alignSelf: { xs: "center", lg: "flex-start" }, fontWeight: 700 }}
-                />
+                <Typography
+                  variant="overline"
+                  sx={{
+                    letterSpacing: "0.22em",
+                    color: "text.secondary",
+                    fontWeight: 500,
+                  }}
+                >
+                  Senior Full-stack Engineer · Dhaka
+                </Typography>
               </motion.div>
 
-              <motion.div variants={fadeUp} custom={0.1}>
+              <motion.div variants={fadeUp} custom={0.08}>
                 <Typography
                   variant="h1"
-                  className={jakartaSans.className}
+                  className="font-display"
                   sx={{
-                    fontSize: { xs: "2.5rem", md: "3.75rem", lg: "4.5rem" },
-                    textAlign: { xs: "center", lg: "left" },
+                    fontSize: { xs: "3rem", sm: "4rem", md: "4.75rem", lg: "5.4rem" },
+                    maxWidth: 720,
                   }}
                 >
-                  Building <TypingRotator /> digital solutions.
+                  Building <TypingRotator /> products for ambitious teams.
                 </Typography>
               </motion.div>
 
-              <motion.div variants={fadeUp} custom={0.22}>
+              <motion.div variants={fadeUp} custom={0.18}>
                 <Typography
-                  variant="body1"
                   color="text.secondary"
-                  sx={{
-                    maxWidth: 560,
-                    fontSize: "1.1rem",
-                    textAlign: { xs: "center", lg: "left" },
-                    mx: { xs: "auto", lg: 0 },
-                  }}
+                  sx={{ maxWidth: 520, fontSize: { xs: "1.05rem", md: "1.15rem" }, lineHeight: 1.8 }}
                 >
-                  I&apos;m <strong>Abu Rayhan</strong>, Senior Full-stack Engineer at{" "}
-                  <Link href="https://flexshipit.com" target="_blank" style={{ color: "inherit" }}>
+                  I&apos;m Abu Rayhan. I architect high-performance web applications
+                  at{" "}
+                  <Link
+                    href="https://flexshipit.com"
+                    target="_blank"
+                    className="text-foreground underline decoration-primary/50 underline-offset-4 hover:decoration-primary"
+                  >
                     FlexShip IT
                   </Link>
-                  . I architect high-performance web applications that merge modern aesthetics with
-                  robust, scalable engineering.
+                  —where product taste and engineering rigor meet.
                 </Typography>
               </motion.div>
 
-              <motion.div variants={fadeUp} custom={0.34}>
-                <Stack
-                  direction="row"
-                  spacing={2}
-                  sx={{
-                    flexWrap: "wrap",
-                    gap: 1,
-                    justifyContent: { xs: "center", lg: "flex-start" },
-                  }}
-                >
+              <motion.div variants={fadeUp} custom={0.28}>
+                <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap", gap: 1.5 }}>
                   <Button
                     variant="contained"
                     size="large"
                     href="https://wa.me/8801621807642?text=Hi! I'm interested in working with you."
                     target="_blank"
                     component="a"
-                    endIcon={<RiArrowRightLongFill />}
+                    endIcon={<ArrowUpRight size={16} />}
                   >
-                    Let&apos;s Talk
+                    Start a project
                   </Button>
                   <Button variant="outlined" size="large" href="/projects" component="a">
-                    View My Work
+                    Selected work
                   </Button>
                 </Stack>
               </motion.div>
 
-              <motion.div variants={fadeUp} custom={0.46}>
+              <motion.div variants={fadeUp} custom={0.38}>
                 <Stack
                   direction="row"
-                  spacing={1.5}
-                  sx={{
-                    pt: 2,
-                    borderTop: 1,
-                    borderColor: "divider",
-                    width: "fit-content",
-                    mx: { xs: "auto", lg: 0 },
-                  }}
+                  spacing={2.5}
+                  sx={{ pt: 1, color: "text.secondary", flexWrap: "wrap" }}
                 >
-                  {socialLinks.map((Social, i) => (
-                    <IconButton
-                      key={i}
+                  {socialLinks.map((social) => (
+                    <Typography
+                      key={social.label}
                       component="a"
-                      href={Social.href}
+                      href={social.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      color="default"
+                      variant="body2"
                       sx={{
-                        color: "text.secondary",
-                        "&:hover": { color: "primary.main", bgcolor: "action.hover" },
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.75,
+                        textDecoration: "none",
+                        "&:hover": { color: "primary.main" },
                       }}
                     >
-                      <Social.Icon className="w-5 h-5" />
-                    </IconButton>
+                      <social.Icon size={14} />
+                      {social.label}
+                    </Typography>
                   ))}
                 </Stack>
               </motion.div>
             </Stack>
-            </motion.div>
-          </Grid>
+          </motion.div>
 
-          <Grid size={{ xs: 12, lg: 6 }} sx={{ order: { xs: 1, lg: 2 } }}>
-            <motion.div
-              variants={pullDown}
-              initial="hidden"
-              animate="visible"
-              style={{ position: "relative", maxWidth: 500, margin: "0 auto" }}
-            >
-              <Paper
-                elevation={0}
-                className="group"
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Box sx={{ position: "relative", maxWidth: 480, mx: "auto" }}>
+              <Box
                 sx={{
                   position: "relative",
-                  aspectRatio: "1 / 1",
+                  aspectRatio: "4 / 5",
                   overflow: "hidden",
-                  borderRadius: 2,
+                  borderRadius: "4px 4px 80px 4px",
                   border: 1,
                   borderColor: "divider",
-                  boxShadow: "0 25px 50px -12px rgba(0,0,0,0.35)",
                 }}
               >
                 <Image
                   src="/hero-rayhan.png"
                   alt="Abu Rayhan at workstation"
                   fill
-                  sizes="(max-width: 1024px) 90vw, 500px"
-                  className="object-cover object-[30%_20%] transition-transform duration-700 group-hover:scale-110"
+                  sizes="(max-width: 1024px) 90vw, 480px"
+                  className="object-cover object-[30%_18%]"
                   priority
                 />
-                <Box
-                  sx={{
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      "linear-gradient(to top, rgba(2,6,23,0.75), transparent 55%, transparent)",
-                    opacity: 0.55,
-                    pointerEvents: "none",
-                  }}
-                />
-              </Paper>
-
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="hidden md:block"
-                style={{
-                  position: "absolute",
-                  top: -16,
-                  right: -16,
-                }}
-              >
-              <Paper
-                elevation={0}
+              </Box>
+              <Stack
+                direction="row"
                 sx={{
-                  p: 2,
-                  minWidth: 180,
+                  justifyContent: "space-between",
+                  mt: 2,
+                  color: "text.secondary",
                 }}
               >
-                <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-                  <Box
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: "50%",
-                      bgcolor: "success.main",
-                      opacity: 0.15,
-                      display: "grid",
-                      placeItems: "center",
-                    }}
-                  >
-                    <Box sx={{ width: 14, height: 14, borderRadius: "50%", bgcolor: "success.main" }} />
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Completed
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                      111+ Projects
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Paper>
-              </motion.div>
-            </motion.div>
-          </Grid>
-        </Grid>
-      </Box>
+                <Typography variant="caption" sx={{ letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                  Available worldwide
+                </Typography>
+                <Typography variant="caption" sx={{ letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                  111+ shipped
+                </Typography>
+              </Stack>
+            </Box>
+          </motion.div>
+        </Box>
     </Box>
   );
 }

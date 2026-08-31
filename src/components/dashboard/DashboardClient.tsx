@@ -7,8 +7,8 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
-  LogOut,
   RefreshCw,
+  Search,
   User,
   Users,
   type LucideIcon,
@@ -19,14 +19,16 @@ import {
   getAdminToken,
 } from "@/lib/admin-session";
 import type { AdminBookingRow } from "@/app/api/admin/bookings/route";
-import AppBar from "@mui/material/AppBar";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import Checkbox from "@mui/material/Checkbox";
+import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
-import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
+import InputAdornment from "@mui/material/InputAdornment";
 import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -34,13 +36,11 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Toolbar from "@mui/material/Toolbar";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Alert from "@mui/material/Alert";
-import Checkbox from "@mui/material/Checkbox";
-import Chip from "@mui/material/Chip";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
+import DashboardShell, {
+  type DashboardNavId,
+} from "@/components/dashboard/DashboardShell";
 import ProjectsAdminPanel from "@/components/dashboard/ProjectsAdminPanel";
 
 type AdminBookingsResponse = {
@@ -54,6 +54,15 @@ type AdminBookingsResponse = {
     marked: number;
   };
 };
+
+const cardSx = {
+  height: "100%",
+  "&:hover": {
+    transform: "none",
+    boxShadow: "none",
+    borderColor: "divider",
+  },
+} as const;
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString("en-US", {
@@ -72,14 +81,14 @@ function StatCard({
   icon: LucideIcon;
 }) {
   return (
-    <Card elevation={0} sx={{ height: "100%" }}>
-      <CardContent>
+    <Card elevation={0} sx={cardSx}>
+      <CardContent sx={{ py: 2.25, "&:last-child": { pb: 2.25 } }}>
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
           <Box>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
               {label}
             </Typography>
-            <Typography variant="h4" sx={{ mt: 0.5, fontWeight: 800 }}>
+            <Typography variant="h4" sx={{ mt: 0.5, fontWeight: 800, letterSpacing: "-0.03em" }}>
               {value}
             </Typography>
           </Box>
@@ -90,9 +99,8 @@ function StatCard({
               borderRadius: 2,
               display: "grid",
               placeItems: "center",
-              bgcolor: "primary.main",
-              color: "primary.contrastText",
-              opacity: 0.9,
+              bgcolor: "action.selected",
+              color: "primary.main",
             }}
           >
             <Icon size={20} />
@@ -107,7 +115,8 @@ export default function DashboardClient() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [ready, setReady] = React.useState(false);
-  const [tab, setTab] = React.useState(0);
+  const [nav, setNav] = React.useState<DashboardNavId>("bookings");
+  const [query, setQuery] = React.useState("");
 
   React.useEffect(() => {
     if (!getAdminToken()) {
@@ -195,73 +204,99 @@ export default function DashboardClient() {
 
   const bookings = data?.bookings ?? [];
   const stats = data?.stats ?? { total: 0, upcoming: 0, past: 0, marked: 0 };
+  const q = query.trim().toLowerCase();
+  const filteredBookings = q
+    ? bookings.filter((booking) => {
+        const haystack = [
+          booking.name,
+          booking.email,
+          booking.phone,
+          booking.date,
+          booking.notes,
+        ]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(q);
+      })
+    : bookings;
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-      <AppBar position="sticky" color="transparent" elevation={0} sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800 }}>
-              Dashboard
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Bookings & projects
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={1}>
-            <Button
-              variant="outlined"
-              onClick={() => refetch()}
-              disabled={isFetching}
-              startIcon={<RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />}
-            >
-              Refresh
-            </Button>
-            <Button variant="contained" onClick={handleLogout} startIcon={<LogOut size={16} />}>
-              Logout
-            </Button>
-          </Stack>
-        </Toolbar>
-      </AppBar>
-
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Stack spacing={3}>
-          <Tabs
-            value={tab}
-            onChange={(_, value) => setTab(value)}
-            sx={{ borderBottom: 1, borderColor: "divider" }}
+    <DashboardShell
+      activeNav={nav}
+      onNavChange={setNav}
+      onLogout={handleLogout}
+      actions={
+        nav === "bookings" ? (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            startIcon={<RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />}
           >
-            <Tab label="Bookings" />
-            <Tab label="Add Project" />
-          </Tabs>
-
-          {tab === 1 ? (
-            <ProjectsAdminPanel />
-          ) : (
-            <>
+            Refresh
+          </Button>
+        ) : undefined
+      }
+    >
+      {nav === "projects" ? (
+        <ProjectsAdminPanel />
+      ) : (
+        <Stack spacing={3}>
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard label="Total bookings" value={stats.total} icon={Users} />
             </Grid>
-            <Grid size={{ xs: 12, sm: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard label="Upcoming" value={stats.upcoming} icon={Calendar} />
             </Grid>
-            <Grid size={{ xs: 12, sm: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard label="Past" value={stats.past} icon={Clock} />
             </Grid>
-            <Grid size={{ xs: 12, sm: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard label="Marked" value={stats.marked} icon={CheckCircle2} />
             </Grid>
           </Grid>
 
-          <Card elevation={0}>
-            <Box sx={{ px: 3, py: 2, borderBottom: 1, borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                All bookings
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {bookings.length} record{bookings.length === 1 ? "" : "s"}
-              </Typography>
+          <Card elevation={0} sx={cardSx}>
+            <Box
+              sx={{
+                px: 3,
+                py: 2,
+                borderBottom: 1,
+                borderColor: "divider",
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 2,
+                justifyContent: "space-between",
+                alignItems: { sm: "center" },
+              }}
+            >
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  All bookings
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {filteredBookings.length} of {bookings.length} record
+                  {bookings.length === 1 ? "" : "s"}
+                </Typography>
+              </Box>
+              <TextField
+                size="small"
+                placeholder="Search name, email, notes…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                sx={{ width: { xs: "100%", sm: 280 } }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Search size={16} />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
             </Box>
 
             {isLoading ? (
@@ -280,6 +315,12 @@ export default function DashboardClient() {
                   No bookings yet.
                 </Typography>
               </Box>
+            ) : filteredBookings.length === 0 ? (
+              <Box sx={{ p: 6, textAlign: "center" }}>
+                <Typography variant="body2" color="text.secondary">
+                  No bookings match “{query}”.
+                </Typography>
+              </Box>
             ) : (
               <TableContainer>
                 <Table>
@@ -294,14 +335,12 @@ export default function DashboardClient() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {bookings.map((booking) => (
+                    {filteredBookings.map((booking) => (
                       <TableRow
                         key={booking._id}
                         hover
                         sx={{
-                          bgcolor: booking.marked
-                            ? "action.selected"
-                            : undefined,
+                          bgcolor: booking.marked ? "action.selected" : undefined,
                         }}
                       >
                         <TableCell padding="checkbox">
@@ -364,7 +403,16 @@ export default function DashboardClient() {
                           </Typography>
                         </TableCell>
                         <TableCell sx={{ maxWidth: 280 }}>
-                          <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              display: "-webkit-box",
+                              WebkitLineClamp: 3,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                            }}
+                          >
                             {booking.notes || "—"}
                           </Typography>
                         </TableCell>
@@ -380,10 +428,8 @@ export default function DashboardClient() {
               </TableContainer>
             )}
           </Card>
-            </>
-          )}
         </Stack>
-      </Container>
-    </Box>
+      )}
+    </DashboardShell>
   );
 }

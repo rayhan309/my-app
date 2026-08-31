@@ -61,8 +61,7 @@ function loadScript(src: string): Promise<void> {
 }
 
 /**
- * Page-load intro matching portfolio.irfans.dev:
- * VANTA.FOG + VANTA.BIRDS (pink low-poly birds), then fade out.
+ * Page-load intro: VANTA.FOG + VANTA.BIRDS using the site primary (champagne).
  */
 export default function PageLoadIntro() {
   const [visible, setVisible] = useState(false);
@@ -99,10 +98,10 @@ export default function PageLoadIntro() {
             mouseControls: false,
             touchControls: false,
             gyroControls: false,
-            highlightColor: 0x0f172a, // --card (dark)
-            midtoneColor: 0x1e293b, // --border / --muted (dark)
-            lowlightColor: 0x020617, // --background (dark)
-            baseColor: 0x3b82f6, // --primary (dark) matches theme accent blue
+            highlightColor: 0x141311,
+            midtoneColor: 0x2a2722,
+            lowlightColor: 0x0b0a09,
+            baseColor: 0xe4c9a0,
             blurFactor: 0.6,
             zoom: 1,
             speed: 1,
@@ -117,8 +116,8 @@ export default function PageLoadIntro() {
             touchControls: true,
             gyroControls: false,
             backgroundAlpha: 0,
-            color1: 0x3b82f6, // --primary / --accent (dark theme)
-            color2: 0x60a5fa, // lighter accent tone used in Background3D
+            color1: 0xe4c9a0,
+            color2: 0xf3e4c8,
             quantity: 5,
             birdSize: 1,
             wingSpan: 40,

@@ -7,11 +7,9 @@ export default async function ProjectsPage() {
   const projects = await getMergedProjects();
 
   return (
-    <div className="container mx-auto px-4 min-h-[calc(100vh-5rem)]">
+    <div className="min-h-[calc(100vh-5rem)]">
       <PageHeader />
-      <div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-      >
+      <div className="grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2">
         {projects.map((project, index) => (
           <ProjectCard key={project.id} project={project} index={index} />
         ))}

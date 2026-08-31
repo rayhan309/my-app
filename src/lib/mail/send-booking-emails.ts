@@ -4,6 +4,8 @@ import {
   bookingAdminText,
   bookingUserHtml,
   bookingUserText,
+  buildBookingIcs,
+  formatBookingDateLong,
   type BookingMailPayload,
 } from "@/lib/mail/booking-templates";
 
@@ -30,21 +32,33 @@ export async function sendBookingEmails(
 
   const fromName = process.env.MAIL_FROM_NAME ?? "Abu Rayhan";
   const fromAddr = `${fromName} <${mailUser}>`;
-
-  await transporter.sendMail({
-    from: fromAddr,
-    to: inboxTo,
-    replyTo: data.email,
-    subject: `New booking: ${data.date} · ${data.time12h} — ${data.name}`,
-    text: bookingAdminText(data),
-    html: bookingAdminHtml(data),
-  });
+  const ics = buildBookingIcs(data);
+  const whenLabel = `${formatBookingDateLong(data.date)} · ${data.time12h}`;
 
   await transporter.sendMail({
     from: fromAddr,
     to: data.email,
-    subject: `Booking confirmed — ${data.date} at ${data.time12h}`,
+    replyTo: inboxTo,
+    subject: `Held for you — ${whenLabel}`,
     text: bookingUserText(data),
     html: bookingUserHtml(data),
+    icalEvent: {
+      method: "REQUEST",
+      filename: "strategy-call.ics",
+      content: ics,
+    },
   });
+
+  try {
+    await transporter.sendMail({
+      from: fromAddr,
+      to: inboxTo,
+      replyTo: data.email,
+      subject: `New reservation — ${data.name} · ${whenLabel}`,
+      text: bookingAdminText(data),
+      html: bookingAdminHtml(data),
+    });
+  } catch (adminErr) {
+    console.error("Admin booking email failed (client mail already sent):", adminErr);
+  }
 }

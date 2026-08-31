@@ -185,7 +185,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        message: "Booking saved successfully. I will confirm shortly.",
+        message:
+          "Booking saved. A confirmation email is on its way to you.",
         success: true,
       },
       { status: 201 }

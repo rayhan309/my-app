@@ -7,19 +7,13 @@ import SectionHeading from "@/components/ui/SectionHeading";
 
 export default function SkillsSection(): JSX.Element {
   return (
-    <Box component="section" id="skills" data-reveal sx={{ py: 10, position: "relative", overflow: "hidden" }}>
-      <Box className="container mx-auto px-4">
-        <SectionHeading
-          eyebrow="My Technical Arsenal"
-          title={
-            <>
-              Skills & <Box component="span" sx={{ color: "text.secondary" }}>Expertise.</Box>
-            </>
-          }
-          description="A comprehensive set of tools and technologies I've mastered over the years to build robust, scalable, and secure digital products."
+    <Box component="section" id="skills" data-reveal sx={{ py: { xs: 10, md: 16 } }}>
+      <SectionHeading
+          eyebrow="Capabilities"
+          title="A focused stack, used in production."
+          description="Tools I reach for when the work has to ship, scale, and stay maintainable."
         />
         <SkillsGrid />
-      </Box>
     </Box>
   );
 }

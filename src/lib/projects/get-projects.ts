@@ -5,9 +5,8 @@ import {
 } from "@/lib/projects/repository";
 import type { ProjectCardData, ProjectDetailData } from "./types";
 
-export async function getMergedProjects(): Promise<ProjectCardData[]> {
-  const dbProjects = await fetchDbProjects();
-  const staticProjects: ProjectCardData[] = Allprojects.map((p) => ({
+function staticProjectsAsCards(): ProjectCardData[] {
+  return Allprojects.map((p) => ({
     id: p.id,
     title: p.title,
     description: p.description,
@@ -15,13 +14,21 @@ export async function getMergedProjects(): Promise<ProjectCardData[]> {
     githubLink: p.githubLink,
     liveLink: p.liveLink ?? null,
     technologies: p.technologies,
-    source: "static",
+    source: "static" as const,
   }));
+}
 
-  const staticIds = new Set(staticProjects.map((p) => p.id));
-  const uniqueDb = dbProjects.filter((p) => !staticIds.has(p.id));
+export async function getMergedProjects(): Promise<ProjectCardData[]> {
+  try {
+    const dbProjects = await fetchDbProjects();
+    if (dbProjects.length > 0) {
+      return dbProjects;
+    }
+  } catch (error) {
+    console.error("Failed to load projects from database:", error);
+  }
 
-  return [...uniqueDb, ...staticProjects];
+  return staticProjectsAsCards();
 }
 
 export function dbProjectToDetail(
@@ -29,43 +36,81 @@ export function dbProjectToDetail(
 ): ProjectDetailData | null {
   if (!doc) return null;
 
+  const stack =
+    doc.stack && Object.keys(doc.stack).length > 0
+      ? doc.stack
+      : { frontend: doc.technologies };
+
   return {
     id: doc.id,
     title: doc.title,
     subtitle: doc.subtitle || doc.title,
     description: doc.description,
     image: doc.image,
-    liveLink: doc.liveLink || "#",
+    liveLink: doc.liveLink,
     githubLink: doc.githubLink || "#",
-    details: {
+    details: doc.details ?? {
       client: "Portfolio Project",
       duration: "—",
       role: "Full-stack Engineer",
       category: "Web Application",
     },
-    features: doc.features?.length
-      ? doc.features
-      : [
-          "Modern, responsive user interface",
-          "Scalable full-stack architecture",
-          "Optimized performance and UX",
-        ],
-    stack: {
-      frontend: doc.technologies,
-      backend: [],
-      deployment: [],
-    },
-    gallery: [doc.image],
+    features: doc.features ?? [],
+    stack,
+    gallery: doc.gallery?.length ? doc.gallery : [doc.image],
     overview: doc.overview || doc.description,
+  };
+}
+
+function toStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function normalizeStack(value: unknown, fallback: string[] = []): Record<string, string[]> {
+  if (!value || typeof value !== "object") {
+    return fallback.length ? { frontend: fallback } : {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .map(([key, items]) => [key, toStringArray(items)] as const)
+      .filter(([, items]) => items.length > 0)
+  );
+}
+
+function staticDetailToProjectDetail(
+  id: string
+): ProjectDetailData | null {
+  const staticDetail = singleProjectDitails(id);
+  if (!staticDetail) return null;
+
+  return {
+    id: staticDetail.id,
+    title: staticDetail.title,
+    subtitle: staticDetail.subtitle,
+    description: staticDetail.description,
+    image: staticDetail.image,
+    liveLink: staticDetail.liveLink ?? null,
+    githubLink: staticDetail.githubLink,
+    details: staticDetail.details,
+    features: staticDetail.features,
+    stack: normalizeStack(staticDetail.stack),
+    gallery: staticDetail.gallery,
+    overview: staticDetail.overview,
   };
 }
 
 export async function getProjectDetailById(
   id: string
 ): Promise<ProjectDetailData | null> {
-  const staticDetail = singleProjectDitails(id);
-  if (staticDetail) return staticDetail as ProjectDetailData;
+  try {
+    const dbDoc = await fetchDbProjectById(id);
+    const fromDb = dbProjectToDetail(dbDoc);
+    if (fromDb) return fromDb;
+  } catch (error) {
+    console.error("Failed to load project detail from database:", error);
+  }
 
-  const dbDoc = await fetchDbProjectById(id);
-  return dbProjectToDetail(dbDoc);
+  return staticDetailToProjectDetail(id);
 }

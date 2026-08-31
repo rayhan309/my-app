@@ -7,6 +7,7 @@ import Background3D from "@/components/shared/Background3D";
 import OverlayPattern from "@/components/shared/OverlayPattern";
 import PageLoadIntro from "@/components/shared/PageLoadIntro";
 import SmoothScroll from "@/components/shared/SmoothScroll";
+import Container from "@/components/shared/Container";
 
 export default function AppChrome({
   children,
@@ -28,7 +29,9 @@ export default function AppChrome({
       <OverlayPattern />
       <Navbar />
       <SmoothScroll>
-        <main className="pt-20">{children}</main>
+        <main className="pt-20">
+          <Container>{children}</Container>
+        </main>
       </SmoothScroll>
     </>
   );

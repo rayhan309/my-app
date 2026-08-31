@@ -1,3 +1,5 @@
+export type ProjectSource = "static" | "dashboard";
+
 export type ProjectCardData = {
   id: string;
   title: string;
@@ -6,7 +8,23 @@ export type ProjectCardData = {
   githubLink: string;
   liveLink: string | null;
   technologies: string[];
-  source?: "static" | "dashboard";
+  source?: ProjectSource;
+};
+
+export type ProjectDetailsMeta = {
+  client: string;
+  duration: string;
+  role: string;
+  category: string;
+};
+
+export type ProjectAdminData = ProjectCardData & {
+  subtitle: string;
+  overview: string;
+  features: string[];
+  details: ProjectDetailsMeta;
+  stack: Record<string, string[]>;
+  gallery: string[];
 };
 
 export type ProjectDocument = {
@@ -17,9 +35,14 @@ export type ProjectDocument = {
   githubLink: string;
   liveLink: string | null;
   technologies: string[];
+  source: ProjectSource;
+  sortOrder: number;
   subtitle?: string;
   overview?: string;
   features?: string[];
+  details?: ProjectDetailsMeta;
+  stack?: Record<string, string[]>;
+  gallery?: string[];
   createdAt: Date;
   updatedAt?: Date;
 };
@@ -30,20 +53,11 @@ export type ProjectDetailData = {
   subtitle: string;
   description: string;
   image: string;
-  liveLink: string;
+  liveLink: string | null;
   githubLink: string;
-  details: {
-    client: string;
-    duration: string;
-    role: string;
-    category: string;
-  };
+  details: ProjectDetailsMeta;
   features: string[];
-  stack: {
-    frontend: string[];
-    backend: string[];
-    deployment: string[];
-  };
+  stack: Record<string, string[]>;
   gallery: string[];
   overview: string;
 };

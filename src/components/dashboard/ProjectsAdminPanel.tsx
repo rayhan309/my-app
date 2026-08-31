@@ -3,13 +3,20 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImagePlus, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Trash2 } from "lucide-react";
 import {
   adminAuthHeaders,
   clearAdminToken,
 } from "@/lib/admin-session";
 import type { AdminProjectsResponse } from "@/app/api/admin/projects/route";
-import type { ProjectCardData } from "@/lib/projects/types";
+import type { ProjectAdminData } from "@/lib/projects/types";
+import {
+  appendProjectFormFields,
+  emptyProjectFormValues,
+  projectToFormValues,
+  type ProjectFormValues,
+} from "@/lib/projects/project-form";
+import ProjectFormFields from "@/components/dashboard/ProjectFormFields";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -20,7 +27,6 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -28,67 +34,54 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 
 type ProjectMutationResponse = {
   success: boolean;
   message?: string;
-  project?: ProjectCardData;
+  project?: ProjectAdminData;
 };
 
-function technologiesToString(technologies: string[]): string {
-  return technologies.join(", ");
+function useObjectUrls(files: File[]) {
+  const [urls, setUrls] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    const next = files.map((file) => URL.createObjectURL(file));
+    setUrls(next);
+    return () => next.forEach((url) => URL.revokeObjectURL(url));
+  }, [files]);
+
+  return urls;
 }
 
 export default function ProjectsAdminPanel() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const galleryInputRef = React.useRef<HTMLInputElement>(null);
   const editFileInputRef = React.useRef<HTMLInputElement>(null);
+  const editGalleryInputRef = React.useRef<HTMLInputElement>(null);
 
-  const [title, setTitle] = React.useState("");
-  const [description, setDescription] = React.useState("");
-  const [githubLink, setGithubLink] = React.useState("");
-  const [liveLink, setLiveLink] = React.useState("");
-  const [technologies, setTechnologies] = React.useState("");
+  const [values, setValues] = React.useState<ProjectFormValues>(emptyProjectFormValues);
   const [imageFile, setImageFile] = React.useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const [galleryFiles, setGalleryFiles] = React.useState<File[]>([]);
   const [formError, setFormError] = React.useState<string | null>(null);
   const [formSuccess, setFormSuccess] = React.useState<string | null>(null);
 
   const [editOpen, setEditOpen] = React.useState(false);
-  const [editingProject, setEditingProject] =
-    React.useState<ProjectCardData | null>(null);
-  const [editTitle, setEditTitle] = React.useState("");
-  const [editDescription, setEditDescription] = React.useState("");
-  const [editGithubLink, setEditGithubLink] = React.useState("");
-  const [editLiveLink, setEditLiveLink] = React.useState("");
-  const [editTechnologies, setEditTechnologies] = React.useState("");
+  const [editingProject, setEditingProject] = React.useState<ProjectAdminData | null>(null);
+  const [editValues, setEditValues] = React.useState<ProjectFormValues>(emptyProjectFormValues);
   const [editImageFile, setEditImageFile] = React.useState<File | null>(null);
-  const [editPreviewUrl, setEditPreviewUrl] = React.useState<string | null>(null);
+  const [editGalleryFiles, setEditGalleryFiles] = React.useState<File[]>([]);
+  const [editGalleryUrls, setEditGalleryUrls] = React.useState<string[]>([]);
   const [editError, setEditError] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (!imageFile) {
-      setPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(imageFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [imageFile]);
-
-  React.useEffect(() => {
-    if (!editImageFile) {
-      setEditPreviewUrl(editingProject?.image ?? null);
-      return;
-    }
-    const url = URL.createObjectURL(editImageFile);
-    setEditPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [editImageFile, editingProject?.image]);
+  const coverPreview = useObjectUrls(imageFile ? [imageFile] : [])[0] ?? null;
+  const galleryPreviews = useObjectUrls(galleryFiles);
+  const editCoverPreview =
+    useObjectUrls(editImageFile ? [editImageFile] : [])[0] ?? editingProject?.image ?? null;
+  const editGalleryPreviews = useObjectUrls(editGalleryFiles);
 
   const { data, isLoading, isError, error } = useQuery<AdminProjectsResponse>({
     queryKey: ["admin-projects"],
@@ -125,16 +118,13 @@ export default function ProjectsAdminPanel() {
   const addMutation = useMutation({
     mutationFn: async () => {
       if (!imageFile) {
-        throw new Error("Please select a project image.");
+        throw new Error("Please select a cover image.");
       }
 
       const formData = new FormData();
-      formData.append("title", title);
-      formData.append("description", description);
-      formData.append("githubLink", githubLink);
-      formData.append("liveLink", liveLink);
-      formData.append("technologies", technologies);
+      appendProjectFormFields(formData, values);
       formData.append("image", imageFile);
+      galleryFiles.forEach((file) => formData.append("gallery", file));
 
       const res = await fetch("/api/admin/projects", {
         method: "POST",
@@ -156,13 +146,11 @@ export default function ProjectsAdminPanel() {
     onSuccess: (json) => {
       setFormSuccess(json.message || "Project added.");
       setFormError(null);
-      setTitle("");
-      setDescription("");
-      setGithubLink("");
-      setLiveLink("");
-      setTechnologies("");
+      setValues(emptyProjectFormValues());
       setImageFile(null);
+      setGalleryFiles([]);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (galleryInputRef.current) galleryInputRef.current.value = "";
       queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
       queryClient.invalidateQueries({ queryKey: ["public-projects"] });
     },
@@ -180,14 +168,12 @@ export default function ProjectsAdminPanel() {
 
       const formData = new FormData();
       formData.append("id", editingProject.id);
-      formData.append("title", editTitle);
-      formData.append("description", editDescription);
-      formData.append("githubLink", editGithubLink);
-      formData.append("liveLink", editLiveLink);
-      formData.append("technologies", editTechnologies);
+      appendProjectFormFields(formData, editValues);
+      formData.append("galleryUrls", editGalleryUrls.join(","));
       if (editImageFile) {
         formData.append("image", editImageFile);
       }
+      editGalleryFiles.forEach((file) => formData.append("gallery", file));
 
       const res = await fetch("/api/admin/projects", {
         method: "PATCH",
@@ -210,28 +196,25 @@ export default function ProjectsAdminPanel() {
       setEditOpen(false);
       setEditingProject(null);
       setEditImageFile(null);
+      setEditGalleryFiles([]);
       if (editFileInputRef.current) editFileInputRef.current.value = "";
+      if (editGalleryInputRef.current) editGalleryInputRef.current.value = "";
       queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
       queryClient.invalidateQueries({ queryKey: ["public-projects"] });
     },
     onError: (err) => {
-      setEditError(
-        err instanceof Error ? err.message : "Failed to update project"
-      );
+      setEditError(err instanceof Error ? err.message : "Failed to update project");
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(
-        `/api/admin/projects?id=${encodeURIComponent(id)}`,
-        {
-          method: "DELETE",
-          headers: {
-            ...adminAuthHeaders(),
-          },
-        }
-      );
+      const res = await fetch(`/api/admin/projects?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: {
+          ...adminAuthHeaders(),
+        },
+      });
       const json = (await res.json()) as { success: boolean; message?: string };
 
       handleAuthError(res);
@@ -255,14 +238,12 @@ export default function ProjectsAdminPanel() {
     addMutation.mutate();
   };
 
-  const openEditDialog = (project: ProjectCardData) => {
+  const openEditDialog = (project: ProjectAdminData) => {
     setEditingProject(project);
-    setEditTitle(project.title);
-    setEditDescription(project.description);
-    setEditGithubLink(project.githubLink === "#" ? "" : project.githubLink);
-    setEditLiveLink(project.liveLink ?? "");
-    setEditTechnologies(technologiesToString(project.technologies));
+    setEditValues(projectToFormValues(project));
+    setEditGalleryUrls(project.gallery ?? []);
     setEditImageFile(null);
+    setEditGalleryFiles([]);
     setEditError(null);
     setEditOpen(true);
   };
@@ -271,8 +252,10 @@ export default function ProjectsAdminPanel() {
     setEditOpen(false);
     setEditingProject(null);
     setEditImageFile(null);
+    setEditGalleryFiles([]);
     setEditError(null);
     if (editFileInputRef.current) editFileInputRef.current.value = "";
+    if (editGalleryInputRef.current) editGalleryInputRef.current.value = "";
   };
 
   return (
@@ -280,101 +263,27 @@ export default function ProjectsAdminPanel() {
       <Card elevation={0}>
         <Box sx={{ px: 3, py: 2, borderBottom: 1, borderColor: "divider" }}>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Add new project
+            Add project
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Image uploads to ImageKit. Project appears on the site after save.
+            Full case-study fields appear on the public project details page.
           </Typography>
         </Box>
         <CardContent>
           <Box component="form" onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="Technologies"
-                  placeholder="React, Node.js, MongoDB"
-                  value={technologies}
-                  onChange={(e) => setTechnologies(e.target.value)}
-                  helperText="Comma-separated"
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <TextField
-                  label="Description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                  multiline
-                  minRows={3}
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="GitHub link"
-                  value={githubLink}
-                  onChange={(e) => setGithubLink(e.target.value)}
-                  placeholder="https://github.com/..."
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="Live demo link"
-                  value={liveLink}
-                  onChange={(e) => setLiveLink(e.target.value)}
-                  placeholder="https://..."
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <Stack spacing={1.5}>
-                  <Button
-                    variant="outlined"
-                    component="label"
-                    startIcon={<ImagePlus size={18} />}
-                  >
-                    {imageFile ? "Change image" : "Upload project image"}
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      hidden
-                      accept="image/jpeg,image/png,image/webp,image/gif"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] ?? null;
-                        setImageFile(file);
-                      }}
-                    />
-                  </Button>
-                  {previewUrl && (
-                    <Box
-                      component="img"
-                      src={previewUrl}
-                      alt="Preview"
-                      sx={{
-                        width: "100%",
-                        maxWidth: 360,
-                        height: 200,
-                        objectFit: "cover",
-                        borderRadius: 2,
-                        border: 1,
-                        borderColor: "divider",
-                      }}
-                    />
-                  )}
-                </Stack>
-              </Grid>
-            </Grid>
+            <ProjectFormFields
+              values={values}
+              onChange={(patch) => setValues((current) => ({ ...current, ...patch }))}
+              coverLabel={imageFile ? "Change cover image" : "Upload cover image"}
+              coverInputRef={fileInputRef}
+              onCoverFile={setImageFile}
+              coverPreview={coverPreview}
+              galleryInputRef={galleryInputRef}
+              onGalleryFiles={(list) => setGalleryFiles(list ? Array.from(list) : [])}
+              existingGallery={[]}
+              onRemoveGalleryUrl={() => undefined}
+              newGalleryPreviews={galleryPreviews}
+            />
 
             {formError && (
               <Alert severity="error" sx={{ mt: 2 }}>
@@ -407,10 +316,10 @@ export default function ProjectsAdminPanel() {
       <Card elevation={0}>
         <Box sx={{ px: 3, py: 2, borderBottom: 1, borderColor: "divider" }}>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Dashboard projects
+            All projects
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {projects.length} project{projects.length === 1 ? "" : "s"} from database
+            {projects.length} project{projects.length === 1 ? "" : "s"} in the database
           </Typography>
         </Box>
 
@@ -427,7 +336,7 @@ export default function ProjectsAdminPanel() {
         ) : projects.length === 0 ? (
           <Box sx={{ p: 6, textAlign: "center" }}>
             <Typography variant="body2" color="text.secondary">
-              No dashboard projects yet. Add one above.
+              No projects yet. Add one above.
             </Typography>
           </Box>
         ) : (
@@ -436,8 +345,8 @@ export default function ProjectsAdminPanel() {
               <TableHead>
                 <TableRow>
                   <TableCell>Title</TableCell>
-                  <TableCell>Technologies</TableCell>
-                  <TableCell>Links</TableCell>
+                  <TableCell>Category</TableCell>
+                  <TableCell>Stack</TableCell>
                   <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -453,38 +362,15 @@ export default function ProjectsAdminPanel() {
                       </Typography>
                     </TableCell>
                     <TableCell>
+                      <Typography variant="body2" color="text.secondary">
+                        {project.details.category}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
                       <Stack direction="row" sx={{ flexWrap: "wrap", gap: 0.5 }}>
                         {project.technologies.slice(0, 4).map((tech) => (
                           <Chip key={tech} label={tech} size="small" />
                         ))}
-                      </Stack>
-                    </TableCell>
-                    <TableCell>
-                      <Stack spacing={0.5}>
-                        {project.liveLink && (
-                          <Typography
-                            component="a"
-                            href={project.liveLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            variant="caption"
-                            color="primary"
-                          >
-                            Live
-                          </Typography>
-                        )}
-                        {project.githubLink && project.githubLink !== "#" && (
-                          <Typography
-                            component="a"
-                            href={project.githubLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            variant="caption"
-                            color="text.secondary"
-                          >
-                            GitHub
-                          </Typography>
-                        )}
                       </Stack>
                     </TableCell>
                     <TableCell align="right">
@@ -521,88 +407,33 @@ export default function ProjectsAdminPanel() {
         )}
       </Card>
 
-      <Dialog open={editOpen} onClose={closeEditDialog} fullWidth maxWidth="md">
-        <DialogTitle sx={{ fontWeight: 700 }}>Edit project</DialogTitle>
+      <Dialog open={editOpen} onClose={closeEditDialog} fullWidth maxWidth="lg">
+        <DialogTitle sx={{ fontWeight: 700 }}>Edit project details</DialogTitle>
         <DialogContent>
-          <Stack spacing={2} sx={{ pt: 1 }}>
-            <TextField
-              label="Title"
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              required
-              fullWidth
+          <Box sx={{ pt: 1 }}>
+            <ProjectFormFields
+              values={editValues}
+              onChange={(patch) => setEditValues((current) => ({ ...current, ...patch }))}
+              coverLabel={editImageFile ? "Change cover image" : "Replace cover image (optional)"}
+              coverInputRef={editFileInputRef}
+              onCoverFile={setEditImageFile}
+              coverPreview={editCoverPreview}
+              galleryInputRef={editGalleryInputRef}
+              onGalleryFiles={(list) =>
+                setEditGalleryFiles(list ? Array.from(list) : [])
+              }
+              existingGallery={editGalleryUrls}
+              onRemoveGalleryUrl={(url) =>
+                setEditGalleryUrls((current) => current.filter((item) => item !== url))
+              }
+              newGalleryPreviews={editGalleryPreviews}
             />
-            <TextField
-              label="Technologies"
-              value={editTechnologies}
-              onChange={(e) => setEditTechnologies(e.target.value)}
-              helperText="Comma-separated"
-              fullWidth
-            />
-            <TextField
-              label="Description"
-              value={editDescription}
-              onChange={(e) => setEditDescription(e.target.value)}
-              required
-              multiline
-              minRows={3}
-              fullWidth
-            />
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="GitHub link"
-                  value={editGithubLink}
-                  onChange={(e) => setEditGithubLink(e.target.value)}
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="Live demo link"
-                  value={editLiveLink}
-                  onChange={(e) => setEditLiveLink(e.target.value)}
-                  fullWidth
-                />
-              </Grid>
-            </Grid>
-            <Stack spacing={1.5}>
-              <Button
-                variant="outlined"
-                component="label"
-                startIcon={<ImagePlus size={18} />}
-              >
-                {editImageFile ? "Change image" : "Replace image (optional)"}
-                <input
-                  ref={editFileInputRef}
-                  type="file"
-                  hidden
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] ?? null;
-                    setEditImageFile(file);
-                  }}
-                />
-              </Button>
-              {editPreviewUrl && (
-                <Box
-                  component="img"
-                  src={editPreviewUrl}
-                  alt="Project preview"
-                  sx={{
-                    width: "100%",
-                    maxWidth: 360,
-                    height: 200,
-                    objectFit: "cover",
-                    borderRadius: 2,
-                    border: 1,
-                    borderColor: "divider",
-                  }}
-                />
-              )}
-            </Stack>
-            {editError && <Alert severity="error">{editError}</Alert>}
-          </Stack>
+            {editError && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {editError}
+              </Alert>
+            )}
+          </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={closeEditDialog}>Cancel</Button>
@@ -619,7 +450,7 @@ export default function ProjectsAdminPanel() {
               ) : undefined
             }
           >
-            {updateMutation.isPending ? "Saving..." : "Save changes"}
+            {updateMutation.isPending ? "Saving..." : "Save details"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,30 +1,30 @@
-"use client";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import HomePage from "@/components/home/HomePage";
+import { getMergedProjects } from "@/lib/projects/get-projects";
+import { PUBLIC_PROJECTS_QUERY_KEY } from "@/lib/projects/query-keys";
 
-import { JSX } from "react";
-import Hero from "@/components/home/Hero/Hero";
-import About from "@/components/home/About/About";
-import SkillsSection from "@/components/home/Skills/SkillsSection";
-import ProjectsSection from "@/components/home/Projects/ProjectsSection";
-import ContactSection from "@/components/home/Contact/ContactSection";
-import FinalSection from "@/components/home/FinalSection/FinalSection";
-import Services from "@/components/home/Services/Services";
+export default async function Home() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000,
+      },
+    },
+  });
 
-export default function Home(): JSX.Element {
+  try {
+    const projects = await getMergedProjects();
+    queryClient.setQueryData(PUBLIC_PROJECTS_QUERY_KEY, {
+      success: true,
+      projects,
+    });
+  } catch (error) {
+    console.error("Failed to prefetch projects:", error);
+  }
 
   return (
-    <div className="relative min-h-screen">
-      {/* Main Sections */}
-      <main>
-        <Hero />
-        <About />
-        <SkillsSection />
-        <ProjectsSection />
-        <Services />
-        <ContactSection />
-        <FinalSection />
-
-        {/* Spacing remove or adjust */}
-      </main>
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <HomePage />
+    </HydrationBoundary>
   );
 }

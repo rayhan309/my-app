@@ -3,15 +3,13 @@
 import React, { useMemo } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
-  CalendarClock,
-  Loader2,
+  ArrowUpRight,
   CheckCircle2,
-  Send,
+  Loader2,
 } from "lucide-react";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import {
   availabilityRangeLabel,
   bookingDateMessage,
@@ -24,6 +22,7 @@ import {
 } from "@/lib/booking-schedule";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { refreshBooking } from "@/lib/refreshCache";
+import { cn } from "@/lib/utils";
 
 export type BookingRow = {
   _id: string;
@@ -40,11 +39,6 @@ export type BookingRow = {
   createdAt?: string;
 };
 
-const jakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta-sans",
-});
-
 type BookingFormData = {
   name: string;
   email: string;
@@ -54,23 +48,66 @@ type BookingFormData = {
   notes: string;
 };
 
+const STEPS = [
+  {
+    n: "01",
+    title: "Scope, honestly",
+    body: "What you are building, what is already decided, and where it is stuck.",
+  },
+  {
+    n: "02",
+    title: "Architecture, not theatre",
+    body: "Stack, constraints, and a realistic path — including what I would not do.",
+  },
+  {
+    n: "03",
+    title: "A next step you can use",
+    body: "Leave with a clear sequence. No pressure to retain anyone.",
+  },
+];
+
+function prettyDate(ymd: string): string {
+  const [y, m, d] = ymd.split("-").map(Number);
+  if (!y || !m || !d) return ymd;
+  return new Date(y, m - 1, d).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function fieldClass(invalid?: boolean) {
+  return cn(
+    "w-full rounded-sm border bg-background px-4 py-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70",
+    invalid ? "border-red-500/80" : "border-border focus:border-primary"
+  );
+}
+
 export default function BookingMeetingClient() {
   const queryClient = useQueryClient();
+  const [now, setNow] = React.useState<Date | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
-  const isFriday = new Date().getDay() === 5;
 
-  const todayStr = useMemo(
-    () => formatLocalYMD(startOfLocalDay(new Date())),
-    []
-  );
+  React.useEffect(() => {
+    setNow(new Date());
+  }, []);
+
+  const hasHydrated = now !== null;
+  const isFriday = now ? now.getDay() === 5 : false;
+
+  const todayStr = useMemo(() => {
+    if (!now) return "";
+    return formatLocalYMD(startOfLocalDay(now));
+  }, [now]);
 
   const maxDateStr = useMemo(() => {
-    const t = startOfLocalDay(new Date());
+    if (!now) return "";
+    const t = startOfLocalDay(now);
     t.setDate(t.getDate() + MAX_BOOKING_ADVANCE_DAYS);
     return formatLocalYMD(t);
-  }, []);
+  }, [now]);
 
   const {
     register,
@@ -119,23 +156,16 @@ export default function BookingMeetingClient() {
     return set;
   }, [bookings, selectedDate]);
 
-  /** Every slot offered for that day (includes booked — shown disabled). */
   const allSlotsForDate = useMemo(() => {
-    if (!selectedDate) return [];
-    if (bookingDateMessage(selectedDate)) return [];
-    return slotsForSelectedDate(selectedDate);
-  }, [selectedDate]);
+    if (!hasHydrated || !selectedDate || !now) return [];
+    if (bookingDateMessage(selectedDate, now)) return [];
+    return slotsForSelectedDate(selectedDate, now);
+  }, [hasHydrated, now, selectedDate]);
 
-  /** Slots the user can actually book. */
   const selectableSlots = useMemo(
     () => allSlotsForDate.filter((slot) => !bookedTimesOnDate.has(slot)),
     [allSlotsForDate, bookedTimesOnDate]
   );
-
-  const bookedCountOnDate = useMemo(() => {
-    if (!selectedDate || allSlotsForDate.length === 0) return 0;
-    return allSlotsForDate.filter((t) => bookedTimesOnDate.has(t)).length;
-  }, [selectedDate, allSlotsForDate, bookedTimesOnDate]);
 
   React.useEffect(() => {
     if (!selectedDate || !selectedTime) return;
@@ -174,277 +204,320 @@ export default function BookingMeetingClient() {
       if (!res.ok || !json?.success) {
         throw new Error(json.message || "Failed to save booking");
       }
-      await refreshBooking('bookings');
+      await refreshBooking("bookings");
       await queryClient.invalidateQueries({ queryKey: ["bookings"] });
       setIsSuccess(true);
       reset();
-      setTimeout(() => setIsSuccess(false), 6000);
     } catch (e) {
       console.error(e);
-      setSubmitError(
-        e instanceof Error ? e.message : "Failed to save booking"
-      );
+      setSubmitError(e instanceof Error ? e.message : "Failed to save booking");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // if (isFriday) {
-  //   return (
-  //     <div className="relative min-h-[calc(100vh-5rem)] pb-20 pt-10">
-  //       <div className="container mx-auto px-4">
-  //         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] ${jakartaSans.className}">
-  //           Friday is closed
-  //         </h1>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
-    <div className="relative min-h-[calc(100vh-5rem)] pb-20 pt-10">
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-10"
+    <div className="relative pb-24 pt-8 md:pt-12">
+      <div className="mb-10 flex items-center justify-between gap-4">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
         >
-          <div className="flex items-center justify-between">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-8"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Link>
+          <ArrowLeft className="h-4 w-4" />
+          Home
+        </Link>
+        <p className="text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground">
+          {!hasHydrated
+            ? "Appointment"
+            : isFriday
+              ? "Studio closed · Friday"
+              : "Booking open"}
+        </p>
+      </div>
 
-            <div
-              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-sm font-medium mb-6 ${isFriday
-                  ? "bg-red-100/20 border-red-200/20 text-red-600" // শুক্রবারের জন্য লালচে কালার
-                  : "bg-primary/10 border-primary/20 text-primary" // অন্য দিনের জন্য প্রাইমারি কালার
-                }`}
-            >
-              <span className="relative flex h-2 w-2">
-                <span
-                  className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isFriday ? "bg-red-500" : "bg-primary"
-                    }`}
-                />
-                <span
-                  className={`relative inline-flex rounded-full h-2 w-2 ${isFriday ? "bg-red-500" : "bg-primary"
-                    }`}
-                />
-              </span>
-              {isFriday ? "Friday is closed" : "Available now"}
-            </div>
-          </div>
-
-          <h1
-            className={`text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] ${jakartaSans.className}`}
-          >
-            Book a {MEETING_DURATION_MINUTES}m{" "}
-            <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-              strategy call
-            </span>
+      <div className="grid grid-cols-1 items-start gap-14 lg:grid-cols-12 lg:gap-16">
+        <motion.aside
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="lg:sticky lg:top-28 lg:col-span-5"
+        >
+          <p className="text-[0.7rem] font-medium uppercase tracking-[0.22em] text-primary">
+            Appointment
+          </p>
+          <h1 className="font-display mt-4 text-4xl leading-[1.05] md:text-5xl lg:text-[3.4rem]">
+            Thirty quiet minutes.
+            <span className="mt-2 block italic text-primary">No pitch required.</span>
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground max-w-2xl leading-relaxed">
-            Reserve a focused session to review goals, technical direction, or
-            collaboration fit. Each slot is {MEETING_DURATION_MINUTES} minutes.
+          <p className="mt-6 max-w-md text-[1.05rem] leading-8 text-muted-foreground">
+            A focused working conversation — goals, technical direction, or whether we should collaborate at all.
           </p>
-          <p className="mt-3 text-sm text-muted-foreground max-w-2xl">
-            Slots run {availabilityRangeLabel()} (local time), every{" "}
-            {MEETING_DURATION_MINUTES} minutes; the last meeting of the day
-            ends at 11:00 PM. Fridays are closed. Past dates and dates more than{" "}
-            {MAX_BOOKING_ADVANCE_DAYS} days ahead cannot be booked.
-          </p>
-        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14 items-start">
-          <motion.aside
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.55, delay: 0.05 }}
-            className="lg:col-span-2 space-y-6"
-          >
-            <div className="rounded-md border border-border/40 bg-card/40 backdrop-blur-sm p-6 shadow-xl">
-              <div className="flex items-center gap-3 text-primary mb-3">
-                <CalendarClock className="w-6 h-6" />
-                <span className="font-bold">What to expect</span>
-              </div>
-              <ul className="space-y-3 text-sm text-muted-foreground leading-relaxed">
-                <li>Quick alignment on scope, stack, and timelines.</li>
-                <li>Honest feedback on feasibility and next steps.</li>
-                <li>No pressure — just a structured working conversation.</li>
-              </ul>
+          <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-border pt-8">
+            <div>
+              <dt className="text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
+                Length
+              </dt>
+              <dd className="font-display mt-1 text-2xl">{MEETING_DURATION_MINUTES} min</dd>
             </div>
-          </motion.aside>
+            <div>
+              <dt className="text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
+                Window
+              </dt>
+              <dd className="mt-1 text-sm leading-6 text-foreground">
+                {availabilityRangeLabel()}
+                <span className="mt-0.5 block text-muted-foreground">Local time</span>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
+                Horizon
+              </dt>
+              <dd className="mt-1 text-sm text-foreground">
+                Next {MAX_BOOKING_ADVANCE_DAYS} days
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
+                Closed
+              </dt>
+              <dd className="mt-1 text-sm text-foreground">Fridays</dd>
+            </div>
+          </dl>
 
-          <motion.div
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.55, delay: 0.1 }}
-            className="lg:col-span-3"
-          >
-            <div className="bg-card/40 border border-border/10 p-6 md:p-10 rounded-md backdrop-blur-sm shadow-2xl">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm opacity-65 font-bold text-foreground">
-                      Full name
-                    </label>
-                    <input
-                      {...register("name", {
-                        required: "Name is required",
-                        minLength: {
-                          value: 2,
-                          message: "Please enter at least 2 characters",
-                        },
-                      })}
-                      placeholder="Your name"
-                      className={`w-full bg-background/50 border ${errors.name ? "border-red-500" : "border-border/50"
-                        } px-5 py-4 rounded-md focus:outline-none focus:border-primary transition-colors`}
-                    />
-                    {errors.name && (
-                      <p className="text-xs text-red-500 font-medium">
-                        {errors.name.message}
-                      </p>
-                    )}
+          <ol className="mt-12 space-y-6">
+            {STEPS.map((step) => (
+              <li key={step.n} className="flex gap-4">
+                <span className="font-display text-sm text-primary">{step.n}</span>
+                <div>
+                  <p className="font-medium text-foreground">{step.title}</p>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">{step.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </motion.aside>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, delay: 0.08 }}
+          className="lg:col-span-7"
+        >
+          <AnimatePresence mode="wait">
+            {isSuccess ? (
+              <motion.div
+                key="done"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="border border-border bg-card px-6 py-14 text-center md:px-12"
+              >
+                <CheckCircle2 className="mx-auto h-8 w-8 text-primary" strokeWidth={1.5} />
+                <h2 className="font-display mt-6 text-3xl md:text-4xl">Held for you.</h2>
+                <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-muted-foreground">
+                  The request is in. I will confirm by email shortly. Until then, the slot is reserved.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsSuccess(false)}
+                  className="mt-8 text-sm text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+                >
+                  Book another time
+                </button>
+              </motion.div>
+            ) : (
+              <motion.form
+                key="form"
+                onSubmit={handleSubmit(onSubmit)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="border border-border bg-card"
+              >
+                <div className="flex items-baseline justify-between border-b border-border px-6 py-5 md:px-8">
+                  <p className="font-display text-2xl">Reserve a slot</p>
+                  <span className="text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
+                    Step sheet
+                  </span>
+                </div>
+
+                <div className="space-y-8 px-6 py-8 md:px-8">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-[0.7rem] uppercase tracking-[0.14em] text-muted-foreground">
+                        Name
+                      </label>
+                      <input
+                        {...register("name", {
+                          required: "Name is required",
+                          minLength: {
+                            value: 2,
+                            message: "Please enter at least 2 characters",
+                          },
+                        })}
+                        placeholder="How should I address you?"
+                        className={fieldClass(Boolean(errors.name))}
+                      />
+                      {errors.name && (
+                        <p className="text-xs text-red-400">{errors.name.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[0.7rem] uppercase tracking-[0.14em] text-muted-foreground">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        {...register("email", {
+                          required: "Email is required",
+                          pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "Invalid email address",
+                          },
+                        })}
+                        placeholder="you@studio.com"
+                        className={fieldClass(Boolean(errors.email))}
+                      />
+                      {errors.email && (
+                        <p className="text-xs text-red-400">{errors.email.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[0.7rem] uppercase tracking-[0.14em] text-muted-foreground">
+                        Phone
+                      </label>
+                      <input
+                        {...register("phone", {
+                          required: "Phone is required",
+                          minLength: {
+                            value: 8,
+                            message: "Enter a valid phone number",
+                          },
+                        })}
+                        placeholder="+880 …"
+                        className={fieldClass(Boolean(errors.phone))}
+                      />
+                      {errors.phone && (
+                        <p className="text-xs text-red-400">{errors.phone.message}</p>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm opacity-65 font-bold text-foreground">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      {...register("email", {
-                        required: "Email is required",
-                        pattern: {
-                          value:
-                            /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: "Invalid email address",
-                        },
-                      })}
-                      placeholder="you@example.com"
-                      className={`w-full bg-background/50 border ${errors.email ? "border-red-500" : "border-border/50"
-                        } px-5 py-4 rounded-md focus:outline-none focus:border-primary transition-colors`}
-                    />
-                    {errors.email && (
-                      <p className="text-xs text-red-500 font-medium">
-                        {errors.email.message}
-                      </p>
-                    )}
+                  <div className="border-t border-border pt-8">
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                      <div className="space-y-2">
+                        <label className="text-[0.7rem] uppercase tracking-[0.14em] text-muted-foreground">
+                          Date
+                        </label>
+                        <input
+                          type="date"
+                          min={hasHydrated ? todayStr : undefined}
+                          max={hasHydrated ? maxDateStr : undefined}
+                          {...register("date", {
+                            required: "Please choose a date",
+                            validate: (v) =>
+                              bookingDateMessage(v) === null ||
+                              bookingDateMessage(v) ||
+                              true,
+                          })}
+                          className={cn(fieldClass(Boolean(errors.date)), "max-w-xs")}
+                        />
+                        {errors.date && (
+                          <p className="text-xs text-red-400">{errors.date.message}</p>
+                        )}
+                      </div>
+                      {selectedDate && !bookingDateMessage(selectedDate) ? (
+                        <p className="font-display text-xl text-primary">
+                          {prettyDate(selectedDate)}
+                        </p>
+                      ) : null}
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm opacity-65 font-bold text-foreground">
-                      Phone
-                    </label>
+                  <div>
+                    <div className="mb-3 flex items-baseline justify-between gap-3">
+                      <label className="text-[0.7rem] uppercase tracking-[0.14em] text-muted-foreground">
+                        Time · {MEETING_DURATION_MINUTES} min
+                      </label>
+                      {selectedDate && allSlotsForDate.length > 0 ? (
+                        <span className="text-xs text-muted-foreground">
+                          {selectableSlots.length} open
+                        </span>
+                      ) : null}
+                    </div>
                     <input
-                      {...register("phone", {
-                        required: "Phone is required",
-                        minLength: {
-                          value: 8,
-                          message: "Enter a valid phone number",
-                        },
-                      })}
-                      placeholder="+880 …"
-                      className={`w-full bg-background/50 border ${errors.phone ? "border-red-500" : "border-border/50"
-                        } px-5 py-4 rounded-md focus:outline-none focus:border-primary transition-colors`}
-                    />
-                    {errors.phone && (
-                      <p className="text-xs text-red-500 font-medium">
-                        {errors.phone.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm opacity-65 font-bold text-foreground">
-                      Date
-                    </label>
-                    <input
-                      type="date"
-                      min={todayStr}
-                      max={maxDateStr}
-                      {...register("date", {
-                        required: "Please choose a date",
-                        validate: (v) =>
-                          bookingDateMessage(v) === null ||
-                          bookingDateMessage(v) ||
-                          true,
-                      })}
-                      className={`w-full bg-background/50 border ${errors.date ? "border-red-500" : "border-border/50"
-                        } px-5 py-4 rounded-md focus:outline-none focus:border-primary transition-colors`}
-                    />
-                    {errors.date && (
-                      <p className="text-xs text-red-500 font-medium">
-                        {errors.date.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm opacity-65 font-bold text-foreground">
-                      Time ({MEETING_DURATION_MINUTES} min)
-                    </label>
-                    <select
+                      type="hidden"
                       {...register("time", {
                         required: "Please choose a time",
                         validate: (v) =>
                           selectedDate &&
-                            selectableSlots.length > 0 &&
-                            selectableSlots.includes(v)
+                          selectableSlots.length > 0 &&
+                          selectableSlots.includes(v)
                             ? true
                             : selectedDate &&
-                              allSlotsForDate.length > 0 &&
-                              selectableSlots.length === 0
-                              ? "Every slot on this day already has an appointment — pick another day."
+                                allSlotsForDate.length > 0 &&
+                                selectableSlots.length === 0
+                              ? "Every slot on this day is taken — pick another day."
                               : selectedDate && allSlotsForDate.length === 0
                                 ? "No slots left for this date — pick another day."
                                 : "Pick a valid time slot",
                       })}
-                      disabled={!selectedDate || allSlotsForDate.length === 0}
-                      className={`w-full bg-background/50 border ${errors.time ? "border-red-500" : "border-border/50"
-                        } px-5 py-4 rounded-md focus:outline-none focus:border-primary transition-colors disabled:opacity-50 [&_option:disabled]:cursor-not-allowed [&_option:disabled]:text-muted-foreground`}
-                    >
-                      <option value="">
-                        {!selectedDate
-                          ? "Pick a date first"
-                          : allSlotsForDate.length === 0
-                            ? "No times available"
-                            : selectableSlots.length === 0
-                              ? "All slots booked — pick another day"
-                              : "Select a time"}
-                      </option>
-                      {allSlotsForDate.map((t) => {
-                        const booked = bookedTimesOnDate.has(t);
-                        return (
-                          <option key={t} value={t} disabled={booked}>
-                            {formatSlotDisplay12h(t)}
-                            {booked ? " — Have an appointment" : ""}
-                          </option>
-                        );
-                      })}
-                    </select>
-                    {bookedCountOnDate > 0 && selectedDate && (
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        <span className="font-semibold text-foreground/80">
-                          appointment
-                        </span>{" "}
-                        are written in the slot book — disabled in the list. Select free slots.
+                    />
+
+                    {!selectedDate ? (
+                      <p className="border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+                        Choose a date to see the day&apos;s grid.
                       </p>
+                    ) : allSlotsForDate.length === 0 ? (
+                      <p className="border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+                        Nothing open on this date. Try another day.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                        {allSlotsForDate.map((t) => {
+                          const booked = bookedTimesOnDate.has(t);
+                          const active = selectedTime === t;
+                          return (
+                            <button
+                              key={t}
+                              type="button"
+                              disabled={booked}
+                              onClick={() =>
+                                setValue("time", t, { shouldValidate: true })
+                              }
+                              className={cn(
+                                "rounded-sm border px-2 py-2.5 text-center text-xs transition-colors",
+                                booked &&
+                                  "cursor-not-allowed border-border/60 text-muted-foreground/50 line-through",
+                                !booked &&
+                                  !active &&
+                                  "border-border text-foreground hover:border-primary hover:text-primary",
+                                active &&
+                                  "border-primary bg-primary text-primary-foreground"
+                              )}
+                            >
+                              {formatSlotDisplay12h(t)}
+                              {booked ? (
+                                <span className="mt-0.5 block text-[10px] no-underline">
+                                  Taken
+                                </span>
+                              ) : null}
+                            </button>
+                          );
+                        })}
+                      </div>
                     )}
                     {errors.time && (
-                      <p className="text-xs text-red-500 font-medium">
-                        {errors.time.message}
-                      </p>
+                      <p className="mt-2 text-xs text-red-400">{errors.time.message}</p>
                     )}
                   </div>
 
-                  <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm opacity-65 font-bold text-foreground">
-                      Agenda (optional)
+                  <div className="space-y-2">
+                    <label className="text-[0.7rem] uppercase tracking-[0.14em] text-muted-foreground">
+                      Agenda · optional
                     </label>
                     <textarea
                       rows={4}
@@ -454,60 +527,42 @@ export default function BookingMeetingClient() {
                           message: "Max 2000 characters",
                         },
                       })}
-                      placeholder="What would you like to cover?"
-                      className={`w-full bg-background/50 border ${errors.notes ? "border-red-500" : "border-border/50"
-                        } px-5 py-4 rounded-md focus:outline-none focus:border-primary transition-colors resize-none`}
+                      placeholder="What should we spend the half-hour on?"
+                      className={cn(fieldClass(Boolean(errors.notes)), "resize-none")}
                     />
                     {errors.notes && (
-                      <p className="text-xs text-red-500 font-medium">
-                        {errors.notes.message}
-                      </p>
+                      <p className="text-xs text-red-400">{errors.notes.message}</p>
                     )}
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={
-                    isSubmitting ||
-                    !selectedDate ||
-                    selectableSlots.length === 0
-                  }
-                  className="w-full bg-primary text-primary-foreground py-4 rounded-md font-bold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-primary/20 group"
-                >
-                  {isSubmitting ? (
-                    <Loader2 className="animate-spin" size={20} />
-                  ) : (
-                    <>
-                      Reserve slot
-                      <Send
-                        size={18}
-                        className="group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform"
-                      />
-                    </>
-                  )}
-                </button>
+                  {submitError ? (
+                    <p className="text-sm text-red-400">{submitError}</p>
+                  ) : null}
 
-                {submitError && (
-                  <p className="text-center text-sm text-red-500 font-medium">
-                    {submitError}
-                  </p>
-                )}
-
-                {isSuccess && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center justify-center gap-2 text-sm text-green-500 font-bold"
+                  <button
+                    type="submit"
+                    disabled={
+                      !hasHydrated ||
+                      isSubmitting ||
+                      !selectedDate ||
+                      selectableSlots.length === 0
+                    }
+                    className="inline-flex w-full items-center justify-center gap-2 bg-primary px-6 py-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
                   >
-                    <CheckCircle2 className="w-5 h-5" />
-                    Request received — I&apos;ll confirm by email shortly.
-                  </motion.div>
-                )}
-              </form>
-            </div>
-          </motion.div>
-        </div>
+                    {isSubmitting ? (
+                      <Loader2 className="animate-spin" size={18} />
+                    ) : (
+                      <>
+                        Confirm reservation
+                        <ArrowUpRight size={16} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </div>
     </div>
   );

@@ -11,10 +11,9 @@ export default function ServicesPage() {
   const all_services = SERVICESDATA;
 
   return (
-    <div className="container mx-auto pt-8">
+    <div className="pt-8">
 
-      {/* services header */}
-      <div className="flex flex-col items-center text-center mb-16 space-y-4 max-w-3xl mx-auto">
+      <div className="mb-16 max-w-2xl space-y-4">
         <motion.span
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -28,7 +27,7 @@ export default function ServicesPage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.08 }}
-          className={`text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1]`}
+          className="font-display text-4xl leading-[1.1] md:text-5xl lg:text-6xl"
         >
           Services <span className="text-muted-foreground">&amp; capabilities.</span>
         </motion.h2>

@@ -4,16 +4,23 @@ import { isImageKitConfigured, uploadProjectImage } from "@/lib/imagekit";
 import {
   createDbProject,
   deleteDbProject,
-  fetchDbProjects,
+  fetchAdminProjects,
   slugifyTitle,
   updateDbProject,
 } from "@/lib/projects/repository";
-import type { ProjectCardData } from "@/lib/projects/types";
+import type { ProjectAdminData } from "@/lib/projects/types";
+import {
+  buildStackFromForm,
+  detailsFromForm,
+  parseCommaList,
+  parseLineList,
+  type ProjectFormValues,
+} from "@/lib/projects/project-form";
 
 export type AdminProjectsResponse = {
   success: boolean;
   message?: string;
-  projects: ProjectCardData[];
+  projects: ProjectAdminData[];
 };
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -23,13 +30,80 @@ const ALLOWED_IMAGE_TYPES = new Set([
   "image/webp",
   "image/gif",
 ]);
+const MAX_GALLERY_IMAGES = 8;
 
-function parseTechnologies(raw: FormDataEntryValue | null): string[] {
-  if (typeof raw !== "string") return [];
-  return raw
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
+function formString(formData: FormData, key: string): string {
+  return String(formData.get(key) ?? "").trim();
+}
+
+function parseFormValues(formData: FormData): ProjectFormValues {
+  return {
+    title: formString(formData, "title"),
+    subtitle: formString(formData, "subtitle"),
+    description: formString(formData, "description"),
+    overview: formString(formData, "overview"),
+    githubLink: formString(formData, "githubLink"),
+    liveLink: formString(formData, "liveLink"),
+    technologies: formString(formData, "technologies"),
+    features: String(formData.get("features") ?? ""),
+    client: formString(formData, "client"),
+    duration: formString(formData, "duration"),
+    role: formString(formData, "role"),
+    category: formString(formData, "category"),
+    stackFrontend: formString(formData, "stackFrontend"),
+    stackBackend: formString(formData, "stackBackend"),
+    stackDeployment: formString(formData, "stackDeployment"),
+    stackExtra: String(formData.get("stackExtra") ?? ""),
+  };
+}
+
+function parseProjectFields(formData: FormData) {
+  const values = parseFormValues(formData);
+  const technologies = parseCommaList(values.technologies);
+  const stack = buildStackFromForm(values);
+  if (!Object.keys(stack).length && technologies.length) {
+    stack.frontend = technologies;
+  }
+
+  return {
+    title: values.title,
+    subtitle: values.subtitle,
+    description: values.description,
+    overview: values.overview || values.description,
+    githubLink: values.githubLink || "#",
+    liveLink: values.liveLink || null,
+    technologies,
+    features: parseLineList(values.features),
+    details: detailsFromForm(values),
+    stack,
+  };
+}
+
+function asImageFiles(entries: FormDataEntryValue[]): File[] {
+  return entries.filter(
+    (entry): entry is File => entry instanceof File && entry.size > 0
+  );
+}
+
+function validateImageFile(file: File): string | null {
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    return "Only JPEG, PNG, WebP, or GIF images are allowed.";
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    return "Each image must be 5 MB or smaller.";
+  }
+  return null;
+}
+
+async function uploadFiles(files: File[]): Promise<string[]> {
+  const urls: string[] = [];
+  for (const file of files) {
+    const error = validateImageFile(file);
+    if (error) throw new Error(error);
+    const buffer = Buffer.from(await file.arrayBuffer());
+    urls.push(await uploadProjectImage(buffer, file.name));
+  }
+  return urls;
 }
 
 export async function GET(req: Request) {
@@ -37,7 +111,7 @@ export async function GET(req: Request) {
   if (authError) return authError;
 
   try {
-    const projects = await fetchDbProjects();
+    const projects = await fetchAdminProjects();
     return NextResponse.json({ success: true, projects });
   } catch (error) {
     console.error("Admin projects GET error:", error);
@@ -61,15 +135,11 @@ export async function POST(req: Request) {
 
   try {
     const formData = await req.formData();
-    const title = String(formData.get("title") ?? "").trim();
-    const description = String(formData.get("description") ?? "").trim();
-    const githubLink = String(formData.get("githubLink") ?? "").trim();
-    const liveLinkRaw = String(formData.get("liveLink") ?? "").trim();
-    const liveLink = liveLinkRaw || null;
-    const technologies = parseTechnologies(formData.get("technologies"));
+    const fields = parseProjectFields(formData);
     const imageFile = formData.get("image");
+    const galleryFiles = asImageFiles(formData.getAll("gallery"));
 
-    if (!title || !description) {
+    if (!fields.title || !fields.description) {
       return NextResponse.json(
         { success: false, message: "Title and description are required." },
         { status: 400 }
@@ -78,40 +148,45 @@ export async function POST(req: Request) {
 
     if (!(imageFile instanceof File) || imageFile.size === 0) {
       return NextResponse.json(
-        { success: false, message: "Project image is required." },
+        { success: false, message: "Cover image is required." },
         { status: 400 }
       );
     }
 
-    if (!ALLOWED_IMAGE_TYPES.has(imageFile.type)) {
+    const coverError = validateImageFile(imageFile);
+    if (coverError) {
+      return NextResponse.json({ success: false, message: coverError }, { status: 400 });
+    }
+
+    if (galleryFiles.length > MAX_GALLERY_IMAGES) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Only JPEG, PNG, WebP, or GIF images are allowed.",
-        },
+        { success: false, message: `Gallery can include up to ${MAX_GALLERY_IMAGES} images.` },
         { status: 400 }
       );
     }
 
-    if (imageFile.size > MAX_IMAGE_BYTES) {
-      return NextResponse.json(
-        { success: false, message: "Image must be 5 MB or smaller." },
-        { status: 400 }
-      );
-    }
-
-    const buffer = Buffer.from(await imageFile.arrayBuffer());
-    const imageUrl = await uploadProjectImage(buffer, imageFile.name);
-    const id = slugifyTitle(title);
+    const imageUrl = await uploadProjectImage(
+      Buffer.from(await imageFile.arrayBuffer()),
+      imageFile.name
+    );
+    const galleryUrls = await uploadFiles(galleryFiles);
+    const gallery = galleryUrls.length ? galleryUrls : [imageUrl];
+    const id = slugifyTitle(fields.title);
 
     const project = await createDbProject({
       id,
-      title,
-      description,
+      title: fields.title,
+      description: fields.description,
       image: imageUrl,
-      githubLink: githubLink || "#",
-      liveLink,
-      technologies,
+      githubLink: fields.githubLink,
+      liveLink: fields.liveLink,
+      technologies: fields.technologies,
+      subtitle: fields.subtitle || fields.title,
+      overview: fields.overview,
+      features: fields.features,
+      details: fields.details,
+      stack: fields.stack,
+      gallery,
     });
 
     return NextResponse.json({
@@ -133,14 +208,11 @@ export async function PATCH(req: Request) {
 
   try {
     const formData = await req.formData();
-    const id = String(formData.get("id") ?? "").trim();
-    const title = String(formData.get("title") ?? "").trim();
-    const description = String(formData.get("description") ?? "").trim();
-    const githubLink = String(formData.get("githubLink") ?? "").trim();
-    const liveLinkRaw = String(formData.get("liveLink") ?? "").trim();
-    const liveLink = liveLinkRaw || null;
-    const technologies = parseTechnologies(formData.get("technologies"));
+    const id = formString(formData, "id");
+    const fields = parseProjectFields(formData);
     const imageFile = formData.get("image");
+    const galleryFiles = asImageFiles(formData.getAll("gallery"));
+    const keptGallery = parseCommaList(formString(formData, "galleryUrls"));
 
     if (!id) {
       return NextResponse.json(
@@ -149,7 +221,7 @@ export async function PATCH(req: Request) {
       );
     }
 
-    if (!title || !description) {
+    if (!fields.title || !fields.description) {
       return NextResponse.json(
         { success: false, message: "Title and description are required." },
         { status: 400 }
@@ -157,43 +229,51 @@ export async function PATCH(req: Request) {
     }
 
     let imageUrl: string | undefined;
-    if (imageFile instanceof File && imageFile.size > 0) {
-      if (!isImageKitConfigured()) {
-        return NextResponse.json(
-          { success: false, message: "ImageKit is not configured." },
-          { status: 503 }
-        );
-      }
+    const needsUpload =
+      (imageFile instanceof File && imageFile.size > 0) || galleryFiles.length > 0;
 
-      if (!ALLOWED_IMAGE_TYPES.has(imageFile.type)) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Only JPEG, PNG, WebP, or GIF images are allowed.",
-          },
-          { status: 400 }
-        );
-      }
-
-      if (imageFile.size > MAX_IMAGE_BYTES) {
-        return NextResponse.json(
-          { success: false, message: "Image must be 5 MB or smaller." },
-          { status: 400 }
-        );
-      }
-
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-      imageUrl = await uploadProjectImage(buffer, imageFile.name);
+    if (needsUpload && !isImageKitConfigured()) {
+      return NextResponse.json(
+        { success: false, message: "ImageKit is not configured." },
+        { status: 503 }
+      );
     }
+
+    if (imageFile instanceof File && imageFile.size > 0) {
+      const coverError = validateImageFile(imageFile);
+      if (coverError) {
+        return NextResponse.json({ success: false, message: coverError }, { status: 400 });
+      }
+      imageUrl = await uploadProjectImage(
+        Buffer.from(await imageFile.arrayBuffer()),
+        imageFile.name
+      );
+    }
+
+    if (galleryFiles.length + keptGallery.length > MAX_GALLERY_IMAGES) {
+      return NextResponse.json(
+        { success: false, message: `Gallery can include up to ${MAX_GALLERY_IMAGES} images.` },
+        { status: 400 }
+      );
+    }
+
+    const uploadedGallery = galleryFiles.length ? await uploadFiles(galleryFiles) : [];
+    const gallery = [...keptGallery, ...uploadedGallery];
 
     const project = await updateDbProject({
       id,
-      title,
-      description,
+      title: fields.title,
+      description: fields.description,
       image: imageUrl,
-      githubLink: githubLink || "#",
-      liveLink,
-      technologies,
+      githubLink: fields.githubLink,
+      liveLink: fields.liveLink,
+      technologies: fields.technologies,
+      subtitle: fields.subtitle || fields.title,
+      overview: fields.overview,
+      features: fields.features,
+      details: fields.details,
+      stack: fields.stack,
+      gallery,
     });
 
     return NextResponse.json({

@@ -5,7 +5,7 @@ import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query
 export const metadata: Metadata = {
   title: "Book a meeting",
   description:
-    "Schedule a 30-minute strategy call with Abu Rayhan. Fridays and invalid dates are not available.",
+    "Reserve a 30-minute strategy call with Abu Rayhan. Fridays closed. Local-time slots.",
 };
 
 export default async function BookingMeetingPage() {

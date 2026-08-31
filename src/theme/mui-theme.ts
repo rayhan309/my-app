@@ -1,13 +1,36 @@
 import { createTheme, type Theme } from "@mui/material/styles";
 
+const displayFont = 'var(--font-instrument), "Times New Roman", serif';
+const bodyFont = "var(--font-outfit), sans-serif";
+
 const sharedTypography = {
-  fontFamily: "var(--font-inter), sans-serif",
-  button: { textTransform: "none" as const, fontWeight: 600 },
-  h1: { fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1.08 },
-  h2: { fontWeight: 800, letterSpacing: "-0.025em", lineHeight: 1.12 },
-  h3: { fontWeight: 700, letterSpacing: "-0.02em" },
+  fontFamily: bodyFont,
+  button: { textTransform: "none" as const, fontWeight: 500, letterSpacing: "0.01em" },
+  h1: {
+    fontFamily: displayFont,
+    fontWeight: 400,
+    letterSpacing: "-0.035em",
+    lineHeight: 1.05,
+  },
+  h2: {
+    fontFamily: displayFont,
+    fontWeight: 400,
+    letterSpacing: "-0.03em",
+    lineHeight: 1.12,
+  },
+  h3: {
+    fontFamily: displayFont,
+    fontWeight: 400,
+    letterSpacing: "-0.02em",
+  },
+  h4: {
+    fontFamily: displayFont,
+    fontWeight: 400,
+  },
+  h5: { fontWeight: 600 },
+  h6: { fontWeight: 600 },
   subtitle1: { fontWeight: 500 },
-  body1: { lineHeight: 1.7 },
+  body1: { lineHeight: 1.75 },
 };
 
 const sharedComponents = (mode: "light" | "dark") => ({
@@ -36,43 +59,49 @@ const sharedComponents = (mode: "light" | "dark") => ({
     },
     styleOverrides: {
       root: {
-        borderRadius: 999,
-        fontWeight: 700,
-        paddingInline: "1.35rem",
+        borderRadius: 8,
+        fontWeight: 500,
+        paddingInline: "1.25rem",
+        paddingBlock: "0.65rem",
+        cursor: "pointer",
+        "&:disabled": {
+          cursor: "not-allowed",
+        },
       },
       containedPrimary: {
-        boxShadow:
-          mode === "dark"
-            ? "0 10px 30px rgba(59, 130, 246, 0.22)"
-            : "0 10px 30px rgba(37, 99, 235, 0.18)",
+        boxShadow: "none",
+      },
+      outlined: {
+        borderColor: mode === "dark" ? "rgba(236, 231, 220, 0.18)" : "rgba(22, 20, 18, 0.16)",
+      },
+    },
+  },
+  MuiIconButton: {
+    styleOverrides: {
+      root: {
+        cursor: "pointer",
+        "&:disabled": {
+          cursor: "not-allowed",
+        },
       },
     },
   },
   MuiCard: {
     styleOverrides: {
       root: {
-        backgroundColor:
-          mode === "dark"
-            ? "rgba(15, 23, 42, 0.4)"
-            : "rgba(255, 255, 255, 0.55)",
+        backgroundColor: mode === "dark" ? "#141311" : "#fffdf8",
         backgroundImage: "none",
-        backdropFilter: "blur(14px)",
-        borderRadius: 16,
+        backdropFilter: "none",
+        borderRadius: 18,
         border: `1px solid ${
-          mode === "dark"
-            ? "rgba(148, 163, 184, 0.14)"
-            : "rgba(226, 232, 240, 0.9)"
+          mode === "dark" ? "rgba(236, 231, 220, 0.08)" : "rgba(22, 20, 18, 0.08)"
         }`,
-        transition: "border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease",
+        boxShadow: "none",
+        transition: "border-color 0.25s ease, transform 0.25s ease",
         "&:hover": {
           borderColor:
-            mode === "dark"
-              ? "rgba(59, 130, 246, 0.35)"
-              : "rgba(37, 99, 235, 0.28)",
-          boxShadow:
-            mode === "dark"
-              ? "0 18px 40px rgba(15, 23, 42, 0.45)"
-              : "0 18px 40px rgba(15, 23, 42, 0.08)",
+            mode === "dark" ? "rgba(228, 201, 160, 0.35)" : "rgba(138, 67, 36, 0.28)",
+          boxShadow: "none",
         },
       },
     },
@@ -80,12 +109,9 @@ const sharedComponents = (mode: "light" | "dark") => ({
   MuiPaper: {
     styleOverrides: {
       root: {
-        backgroundColor:
-          mode === "dark"
-            ? "rgba(15, 23, 42, 0.4)"
-            : "rgba(255, 255, 255, 0.55)",
+        backgroundColor: mode === "dark" ? "#141311" : "#fffdf8",
         backgroundImage: "none",
-        backdropFilter: "blur(14px)",
+        backdropFilter: "none",
       },
     },
   },
@@ -93,7 +119,7 @@ const sharedComponents = (mode: "light" | "dark") => ({
     styleOverrides: {
       root: {
         backgroundImage: "none",
-        backdropFilter: "blur(16px)",
+        backdropFilter: "blur(18px)",
         boxShadow: "none",
       },
     },
@@ -107,27 +133,23 @@ const sharedComponents = (mode: "light" | "dark") => ({
   MuiOutlinedInput: {
     styleOverrides: {
       root: {
-        borderRadius: 12,
-        backgroundColor:
-          mode === "dark"
-            ? "rgba(2, 6, 23, 0.45)"
-            : "rgba(248, 250, 252, 0.85)",
+        borderRadius: 10,
+        backgroundColor: mode === "dark" ? "rgba(11, 10, 9, 0.55)" : "rgba(255, 253, 248, 0.9)",
       },
     },
   },
   MuiChip: {
     styleOverrides: {
       root: {
-        fontWeight: 700,
-        fontSize: "0.65rem",
-        letterSpacing: "0.08em",
-        textTransform: "uppercase" as const,
+        fontWeight: 500,
+        fontSize: "0.7rem",
+        letterSpacing: "0.04em",
+        textTransform: "none" as const,
+        borderRadius: 6,
       },
       filled: {
         border: `1px solid ${
-          mode === "dark"
-            ? "rgba(59, 130, 246, 0.22)"
-            : "rgba(37, 99, 235, 0.15)"
+          mode === "dark" ? "rgba(228, 201, 160, 0.18)" : "rgba(138, 67, 36, 0.12)"
         }`,
       },
     },
@@ -135,12 +157,10 @@ const sharedComponents = (mode: "light" | "dark") => ({
   MuiLinearProgress: {
     styleOverrides: {
       root: {
-        height: 6,
+        height: 4,
         borderRadius: 999,
         backgroundColor:
-          mode === "dark"
-            ? "rgba(148, 163, 184, 0.14)"
-            : "rgba(100, 116, 139, 0.12)",
+          mode === "dark" ? "rgba(236, 231, 220, 0.1)" : "rgba(22, 20, 18, 0.08)",
       },
       bar: {
         borderRadius: 999,
@@ -150,14 +170,14 @@ const sharedComponents = (mode: "light" | "dark") => ({
   MuiAlert: {
     styleOverrides: {
       root: {
-        borderRadius: 12,
+        borderRadius: 10,
       },
     },
   },
   MuiTableCell: {
     styleOverrides: {
       head: {
-        fontWeight: 700,
+        fontWeight: 600,
         textTransform: "uppercase" as const,
         fontSize: "0.7rem",
         letterSpacing: "0.08em",
@@ -171,36 +191,31 @@ export function getMuiTheme(mode: "light" | "dark"): Theme {
     palette: {
       mode,
       primary: {
-        main: mode === "dark" ? "#3b82f6" : "#2563eb",
-        contrastText: "#ffffff",
+        main: mode === "dark" ? "#e4c9a0" : "#8a4324",
+        contrastText: mode === "dark" ? "#1a1612" : "#fffaf3",
       },
       secondary: {
-        main: mode === "dark" ? "#8b5cf6" : "#7c3aed",
+        main: mode === "dark" ? "#9a9386" : "#6f685c",
       },
       success: {
-        main: "#22c55e",
+        main: "#6f8f6a",
       },
       error: {
-        main: "#ef4444",
+        main: "#c45c4a",
       },
       background: {
-        default: mode === "dark" ? "#020617" : "#f8fafc",
-        paper:
-          mode === "dark"
-            ? "rgba(15, 23, 42, 0.4)"
-            : "rgba(255, 255, 255, 0.55)",
+        default: mode === "dark" ? "#0b0a09" : "#f4f0e8",
+        paper: mode === "dark" ? "#141311" : "#fffdf8",
       },
       text: {
-        primary: mode === "dark" ? "#f8fafc" : "#0f172a",
-        secondary: mode === "dark" ? "#94a3b8" : "#64748b",
+        primary: mode === "dark" ? "#ece7dc" : "#161412",
+        secondary: mode === "dark" ? "#9a9386" : "#6f685c",
       },
       divider:
-        mode === "dark"
-          ? "rgba(148, 163, 184, 0.14)"
-          : "rgba(226, 232, 240, 0.95)",
+        mode === "dark" ? "rgba(236, 231, 220, 0.08)" : "rgba(22, 20, 18, 0.08)",
     },
     shape: {
-      borderRadius: 12,
+      borderRadius: 10,
     },
     typography: sharedTypography,
     components: sharedComponents(mode),

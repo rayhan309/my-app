@@ -1,13 +1,7 @@
 "use client";
 
-import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { Plus_Jakarta_Sans } from "next/font/google";
-
-const jakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-});
 
 type SectionHeadingProps = {
   eyebrow: string;
@@ -20,7 +14,7 @@ export default function SectionHeading({
   eyebrow,
   title,
   description,
-  align = "center",
+  align = "left",
 }: SectionHeadingProps) {
   const centered = align === "center";
 
@@ -33,24 +27,25 @@ export default function SectionHeading({
         textAlign: centered ? "center" : "left",
       }}
     >
-      <Chip
-        label={eyebrow}
-        color="primary"
-        variant="outlined"
-        size="small"
+      <Typography
+        variant="overline"
         sx={{
-          fontWeight: 700,
-          letterSpacing: "0.12em",
-          px: 0.5,
+          color: "primary.main",
+          letterSpacing: "0.22em",
+          fontWeight: 500,
+          fontSize: "0.7rem",
         }}
-      />
+      >
+        {eyebrow}
+      </Typography>
       <Typography
         variant="h2"
         component="h2"
-        className={jakartaSans.className}
+        className="font-display"
         sx={{
-          fontSize: { xs: "2.25rem", md: "3rem", lg: "3.5rem" },
-          maxWidth: centered ? 900 : 720,
+          fontSize: { xs: "2.4rem", md: "3.4rem", lg: "4rem" },
+          maxWidth: centered ? 820 : 720,
+          fontWeight: 400,
         }}
       >
         {title}
@@ -59,7 +54,7 @@ export default function SectionHeading({
         <Typography
           variant="body1"
           color="text.secondary"
-          sx={{ maxWidth: centered ? 720 : 560, fontSize: "1.05rem" }}
+          sx={{ maxWidth: centered ? 640 : 540, fontSize: "1.05rem" }}
         >
           {description}
         </Typography>
