@@ -29,7 +29,7 @@ export default function FinalSection() {
               { Icon: FaGithub, href: "https://github.com/rayhan309", label: "GitHub" },
               {
                 Icon: FaLinkedin,
-                href: "https://www.linkedin.com/in/abu-rayhan-undefined-2514b5390/",
+                href: "https://www.linkedin.com/in/abu-rayhan-dev-2514b5390/",
                 label: "LinkedIn",
               },
               { Icon: FaTwitter, href: "https://x.com/AbuRayhan1818", label: "X" },

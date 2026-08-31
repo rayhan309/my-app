@@ -33,15 +33,28 @@ export default function Navbar(): JSX.Element {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const updateScrolled = () => {
-      setScrolled(getScrollY() > 20);
+    let last = false;
+    let raf = 0;
+
+    const apply = () => {
+      raf = 0;
+      const next = getScrollY() > 20;
+      if (next === last) return;
+      last = next;
+      setScrolled(next);
     };
 
-    updateScrolled();
-    gsap.ticker.add(updateScrolled);
+    const onTick = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(apply);
+    };
+
+    apply();
+    gsap.ticker.add(onTick);
 
     return () => {
-      gsap.ticker.remove(updateScrolled);
+      gsap.ticker.remove(onTick);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
 

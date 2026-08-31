@@ -24,7 +24,7 @@ const fadeUp = {
 const socialLinks = [
   { href: "https://github.com/rayhan309", label: "GitHub", Icon: FaGithub },
   {
-    href: "https://www.linkedin.com/in/abu-rayhan-undefined-2514b5390/",
+    href: "https://www.linkedin.com/in/abu-rayhan-dev-2514b5390/",
     label: "LinkedIn",
     Icon: FaLinkedin,
   },
