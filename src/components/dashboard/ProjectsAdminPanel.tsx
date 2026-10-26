@@ -77,10 +77,19 @@ export default function ProjectsAdminPanel() {
   const [editGalleryUrls, setEditGalleryUrls] = React.useState<string[]>([]);
   const [editError, setEditError] = React.useState<string | null>(null);
 
-  const coverPreview = useObjectUrls(imageFile ? [imageFile] : [])[0] ?? null;
+  const coverFiles = React.useMemo(
+    () => (imageFile ? [imageFile] : []),
+    [imageFile],
+  );
+  const editCoverFiles = React.useMemo(
+    () => (editImageFile ? [editImageFile] : []),
+    [editImageFile],
+  );
+
+  const coverPreview = useObjectUrls(coverFiles)[0] ?? null;
   const galleryPreviews = useObjectUrls(galleryFiles);
   const editCoverPreview =
-    useObjectUrls(editImageFile ? [editImageFile] : [])[0] ?? editingProject?.image ?? null;
+    useObjectUrls(editCoverFiles)[0] ?? editingProject?.image ?? null;
   const editGalleryPreviews = useObjectUrls(editGalleryFiles);
 
   const { data, isLoading, isError, error } = useQuery<AdminProjectsResponse>({

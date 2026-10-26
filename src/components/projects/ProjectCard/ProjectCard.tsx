@@ -33,7 +33,7 @@ export default function ProjectCard({
             src={project.image}
             alt={project.title}
             fill
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+            className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.04]"
           />
         </div>
         <div className="flex items-start justify-between gap-4">

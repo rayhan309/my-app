@@ -263,7 +263,7 @@ export default function ProjectDetails({
                   src={src}
                   alt={`${project.title} screenshot ${i + 1}`}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                  className="object-contain transition-transform duration-700 group-hover:scale-[1.03]"
                   sizes={
                     i === 0 && gallery.length > 1
                       ? "100vw"
