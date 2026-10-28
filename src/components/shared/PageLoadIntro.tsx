@@ -77,14 +77,24 @@ export default function PageLoadIntro() {
     ).matches;
     if (prefersReduced) return;
 
+    if (sessionStorage.getItem("intro_viewed")) {
+      return;
+    }
+    sessionStorage.setItem("intro_viewed", "true");
+
     let cancelled = false;
     setVisible(true);
-    document.documentElement.style.overflow = "hidden";
 
     async function init() {
       try {
-        await loadScript(THREE_CDN);
-        await Promise.all([loadScript(VANTA_FOG_CDN), loadScript(VANTA_BIRDS_CDN)]);
+        await Promise.race([
+          Promise.all([
+            loadScript(THREE_CDN),
+            loadScript(VANTA_FOG_CDN),
+            loadScript(VANTA_BIRDS_CDN),
+          ]),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2500)),
+        ]);
         if (cancelled) return;
 
         const THREE = window.THREE;
@@ -125,24 +135,23 @@ export default function PageLoadIntro() {
           });
         }
       } catch (err) {
-        console.error("Failed to init bird intro", err);
+        console.warn("Bird intro skipped or timed out", err);
+        setHiding(true);
+        setTimeout(() => setVisible(false), 300);
       }
     }
 
     void init();
 
-    // Same timing as portfolio.irfans.dev entry-loader
-    const hideStart = window.setTimeout(() => setHiding(true), 2000);
+    const hideStart = window.setTimeout(() => setHiding(true), 1500);
     const remove = window.setTimeout(() => {
       setVisible(false);
-      document.documentElement.style.overflow = "";
-    }, 2000 + 1250);
+    }, 1500 + 800);
 
     return () => {
       cancelled = true;
       window.clearTimeout(hideStart);
       window.clearTimeout(remove);
-      document.documentElement.style.overflow = "";
       try {
         fogEffect.current?.destroy();
         birdsEffect.current?.destroy();

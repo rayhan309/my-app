@@ -1,13 +1,7 @@
 "use client";
 
-import React, { useRef } from "react";
-import {
-  gsap,
-  registerGsapPlugins,
-  ScrollSmoother,
-  ScrollTrigger,
-  useGSAP,
-} from "@/lib/gsap";
+import React, { useEffect } from "react";
+import { gsap, registerGsapPlugins, ScrollTrigger } from "@/lib/gsap";
 import { scrollToHash } from "@/lib/smooth-scroll";
 
 registerGsapPlugins();
@@ -17,76 +11,72 @@ export default function SmoothScroll({
 }: {
   children: React.ReactNode;
 }) {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
-  useGSAP(
-    () => {
-      const prefersReduced = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
+    const elements = document.querySelectorAll<HTMLElement>("[data-reveal]");
 
-      if (prefersReduced) {
-        gsap.set("[data-reveal]", { opacity: 1, y: 0, clearProps: "transform" });
-        return;
-      }
-
-      if (!wrapperRef.current || !contentRef.current) {
-        return;
-      }
-
-      document.documentElement.classList.add("smooth-scroll-active");
-
-      const smoother = ScrollSmoother.create({
-        wrapper: wrapperRef.current,
-        content: contentRef.current,
-        smooth: 1.15,
-        smoothTouch: 0.1,
-        effects: true,
-        normalizeScroll: true,
+    if (prefersReduced) {
+      elements.forEach((el) => {
+        el.style.opacity = "1";
+        el.style.transform = "none";
       });
+      return;
+    }
 
-      const hash = window.location.hash;
-      if (hash) {
-        gsap.delayedCall(0.35, () => scrollToHash(hash));
-      }
+    const triggers: ScrollTrigger[] = [];
 
-      ScrollTrigger.batch("[data-reveal]", {
-        start: "top 88%",
-        once: true,
-        onEnter: (elements) => {
-          gsap.fromTo(
-            elements,
-            { opacity: 0, y: 48 },
-            {
+    elements.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      const inViewport = rect.top < window.innerHeight * 0.95;
+
+      if (inViewport) {
+        // Elements already in viewport (e.g. at top on load) should show immediately
+        gsap.to(el, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power2.out",
+          clearProps: "all",
+        });
+      } else {
+        // Elements further down fade in when scrolled into view
+        gsap.set(el, { opacity: 0, y: 30 });
+        const trigger = ScrollTrigger.create({
+          trigger: el,
+          start: "top 90%",
+          once: true,
+          onEnter: () => {
+            gsap.to(el, {
               opacity: 1,
               y: 0,
-              duration: 0.85,
-              stagger: 0.12,
-              ease: "power3.out",
-              overwrite: true,
-            }
-          );
-        },
-      });
+              duration: 0.75,
+              ease: "power2.out",
+              clearProps: "all",
+            });
+          },
+        });
+        triggers.push(trigger);
+      }
+    });
 
+    // Handle hash links if any
+    const hash = window.location.hash;
+    if (hash) {
+      const timer = setTimeout(() => scrollToHash(hash), 250);
       return () => {
-        document.documentElement.classList.remove("smooth-scroll-active");
-        smoother.kill();
+        clearTimeout(timer);
+        triggers.forEach((t) => t.kill());
       };
-    },
-    { scope: wrapperRef }
-  );
+    }
 
-  return (
-    <div
-      id="smooth-wrapper"
-      ref={wrapperRef}
-      className="fixed inset-0 z-[1] overflow-hidden bg-transparent"
-    >
-      <div id="smooth-content" ref={contentRef}>
-        {children}
-      </div>
-    </div>
-  );
+    return () => {
+      triggers.forEach((t) => t.kill());
+    };
+  }, []);
+
+  return <div className="relative w-full bg-transparent">{children}</div>;
 }
+

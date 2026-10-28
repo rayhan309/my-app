@@ -77,31 +77,10 @@ button:disabled,
 
 html {
   view-transition-name: root;
-}
-
-html.smooth-scroll-active,
-html.smooth-scroll-active body {
-  overflow: hidden;
-  height: 100%;
-}
-
-#smooth-wrapper {
-  width: 100%;
-}
-
-#smooth-wrapper,
-#smooth-content,
-main {
-  background: transparent;
-}
-
-#smooth-content {
-  will-change: transform;
+  scroll-behavior: smooth;
 }
 
 [data-reveal] {
-  opacity: 0;
-  transform: translateY(2.5rem);
   will-change: transform, opacity;
 }
 

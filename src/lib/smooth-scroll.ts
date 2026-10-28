@@ -1,39 +1,24 @@
-import { ScrollSmoother } from "gsap/ScrollSmoother";
-import { gsap, registerGsapPlugins } from "@/lib/gsap";
-
-registerGsapPlugins();
-
 export function getScrollY(): number {
-  const smoother = ScrollSmoother.get();
-  return smoother ? smoother.scrollTop() : window.scrollY;
+  return typeof window !== "undefined" ? window.scrollY : 0;
 }
 
-export function scrollToHash(hash: string, offsetY = 88): void {
+export function scrollToHash(hash: string, offsetY = 80): void {
+  if (typeof window === "undefined") return;
   const id = hash.replace(/^#/, "");
   const target = id ? document.getElementById(id) : null;
-  const smoother = ScrollSmoother.get();
-
-  if (smoother) {
-    if (target) {
-      smoother.scrollTo(target, true, `top ${offsetY}px`);
-    } else {
-      smoother.scrollTo(0, true);
-    }
-    return;
-  }
 
   if (target) {
-    gsap.to(window, {
-      duration: 1,
-      ease: "power3.inOut",
-      scrollTo: { y: target, offsetY },
+    const targetY = target.getBoundingClientRect().top + window.scrollY - offsetY;
+    window.scrollTo({
+      top: Math.max(0, targetY),
+      behavior: "smooth",
     });
     return;
   }
 
-  gsap.to(window, {
-    duration: 1,
-    ease: "power3.inOut",
-    scrollTo: { y: 0 },
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
   });
 }
+
