@@ -105,13 +105,29 @@ async function seedStaticProjects(): Promise<number> {
   const collection = dbConnect<ProjectDocument>(PROJECTS_COLLECTION_NAME);
 
   const result = await collection.bulkWrite(
-    documents.map((doc) => ({
-      updateOne: {
-        filter: { id: doc.id },
-        update: { $setOnInsert: doc },
-        upsert: true,
-      },
-    })),
+    documents.flatMap((doc) => {
+      const { createdAt, ...fields } = doc;
+      return [
+        {
+          updateOne: {
+            filter: { id: doc.id },
+            update: { $setOnInsert: doc },
+            upsert: true,
+          },
+        },
+        {
+          updateOne: {
+            filter: { id: doc.id, source: "static" },
+            update: {
+              $set: {
+                ...fields,
+                updatedAt: new Date(),
+              },
+            },
+          },
+        },
+      ];
+    }),
     { ordered: false }
   );
 

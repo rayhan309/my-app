@@ -110,13 +110,21 @@ export default function ProjectDetails({
         transition={{ delay: 0.08 }}
         className="mt-10 md:mt-12"
       >
-        <div className="relative aspect-[16/9] min-h-[240px] overflow-hidden border border-border bg-card sm:min-h-[320px]">
+        <div className="relative aspect-[16/9] min-h-[240px] overflow-hidden border border-border bg-card/60 sm:min-h-[320px]">
+          <div
+            className="pointer-events-none absolute inset-0 scale-125 opacity-25 blur-xl"
+            style={{
+              backgroundImage: `url("${project.image}")`,
+              backgroundPosition: "center",
+              backgroundSize: "cover",
+            }}
+          />
           <Image
             src={project.image}
             alt={project.title}
             fill
             priority
-            className="object-cover"
+            className="relative z-10 object-contain"
             sizes="100vw"
           />
         </div>

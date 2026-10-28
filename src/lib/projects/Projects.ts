@@ -1,12 +1,35 @@
+const GITHUB_REPOS = "https://github.com/rayhan309?tab=repositories";
+
 export const Allprojects = [
+  {
+    id: "15",
+    title: "Hidden Urban",
+    description:
+      "Production menswear storefront for Hidden Urban — catalog, cart, and nationwide checkout on a custom domain built for daily conversion.",
+    image: "/hiddenurban_mockup.png",
+    githubLink: GITHUB_REPOS,
+    liveLink: "https://hiddenurban.com/",
+    technologies: ["Next.js", "React", "Tailwind CSS", "ImageKit", "Vercel"],
+  },
   {
     id: "2",
     title: "Fashion Museum BD",
-    description: "A premium fashion retail solution focusing on high-quality visual presentation and user engagement.",
+    description:
+      "Brand-led fashion retail for Fashion Museum BD, pairing editorial storytelling with a shoppable catalog for mens and womens collections.",
     image: "/fashionmuseum_mockup.png",
-    githubLink: "https://github.com/rayhan309",
+    githubLink: GITHUB_REPOS,
     liveLink: "https://fashionmuseumbd.com/",
-    technologies: ["Next.js", "React", "Tailwind CSS", "Vercel", "MUI", "Framer Motion"],
+    technologies: ["Next.js", "React", "Tailwind CSS", "Vercel"],
+  },
+  {
+    id: "16",
+    title: "Eco Fashion BD",
+    description:
+      "Bengali-first e-commerce for Eco Fashion BD — promotions, search, and cash-on-delivery flows designed for Bangladesh shoppers.",
+    image: "/ecofashion_mockup.png",
+    githubLink: GITHUB_REPOS,
+    liveLink: "https://ecofashionbd.store/",
+    technologies: ["Next.js", "React", "Tailwind CSS", "ImageKit", "Vercel"],
   },
   {
     id: "7",
@@ -136,47 +159,96 @@ export const singleProject = (id: string) => {
 
 export const AllprojectsDitails = [
   {
+    id: "15",
+    title: "Hidden Urban",
+    subtitle: "Menswear commerce for a Dhaka-based brand",
+    description:
+      "Hidden Urban is a live retail site for a men's fashion label selling sunglasses, apparel, and accessories. The work covers the public storefront: product discovery, social proof, and a checkout path that matches how customers in Bangladesh actually buy — including delivery, returns, and direct support.",
+    image: "/hiddenurban_mockup.png",
+    liveLink: "https://hiddenurban.com/",
+    githubLink: GITHUB_REPOS,
+    details: {
+      client: "Hidden Urban",
+      duration: "8 weeks",
+      role: "Full-stack Engineer",
+      category: "E-commerce / Menswear",
+    },
+    features: [
+      "Product catalog with category merchandising for eyewear and apparel",
+      "Verified customer reviews tied to purchased SKUs to build trust at the fold",
+      "Clear delivery, returns, and support policies on the storefront",
+      "Click-to-call and store contact details for order and sizing questions",
+      "Responsive layout tuned for mobile shopping on a custom domain",
+    ],
+    stack: {
+      frontend: ["Next.js", "React", "Tailwind CSS"],
+      media: ["ImageKit"],
+      deployment: ["Vercel", "hiddenurban.com"],
+    },
+    gallery: ["/hiddenurban_mockup.png"],
+    overview:
+      "The brief was a store that feels premium without slowing down on mobile. I kept the interface quiet so product photography could lead, then placed delivery, returns, and reviews where they reduce hesitation before checkout. The result is a production storefront a buyer can evaluate in a few seconds — brand, assortment, and path to purchase.",
+  },
+  {
     id: "2",
     title: "Fashion Museum BD",
-    subtitle: "Premium E-commerce & Fashion Showcase",
-    description: "A high-performance fashion retail platform built to deliver a luxury shopping experience. It features high-quality visual galleries, interactive product displays, and a seamless checkout flow optimized for conversion.",
+    subtitle: "Editorial fashion retail for mens and womens",
+    description:
+      "Fashion Museum BD is a brand site and shop in one: heritage-led storytelling on the homepage, then a structured catalog for mens and womens. The build focuses on first impression, collection navigation, and a login-ready account path without turning the brand into a generic template store.",
     image: "/fashionmuseum_mockup.png",
     liveLink: "https://fashionmuseumbd.com/",
-    githubLink: "https://github.com/rayhan309",
-
-    // Detailed metadata for the project page
+    githubLink: GITHUB_REPOS,
     details: {
       client: "Fashion Museum BD",
-      duration: "2 Months",
-      role: "Senior Full-stack Engineer",
-      category: "E-commerce / Retail",
+      duration: "2 months",
+      role: "Full-stack Engineer",
+      category: "E-commerce / Brand retail",
     },
-
-    // Key highlights to show in a list
     features: [
-      "Dynamic Product Catalog with advanced filtering",
-      "High-end smooth animations using Framer Motion",
-      "Responsive and Mobile-first Design with Tailwind & MUI",
-      "SEO optimized Server-side rendering with Next.js",
-      "Integrated secure payment and order tracking",
+      "Hero and brand narrative positioned for conversion, not decoration",
+      "Shop architecture for mens, womens, and curated departments",
+      "Account entry (login) prepared for returning customers",
+      "Search and cart access from the primary navigation",
+      "Mobile-first layout with production photography as the visual system",
     ],
-
-    // Grouped technologies for a better UI display
     stack: {
-      frontend: ["Next.js", "React", "MUI", "Framer Motion", "Tailwind CSS"],
-      backend: ["Node.js", "Express", "MongoDB"], // Based on your typical stack
-      deployment: ["Vercel"],
+      frontend: ["Next.js", "React", "Tailwind CSS"],
+      deployment: ["Vercel", "fashionmuseumbd.com"],
     },
-
-    // If you want to show a gallery on the details page
-    gallery: [
-      "/fashion-museum-home.png",
-      "/fashion-museum-product.png",
-      "/fashion-museum-mobile.png",
+    gallery: ["/fashionmuseum_mockup.png"],
+    overview:
+      "Fashion retail sites fail when the brand story and the shop feel like two different products. I treated the homepage as a campaign surface and the catalog as the operating system underneath it — same type, same navigation, same performance budget. Imagery stays large; the shop path stays obvious. That is what a founder or buyer should see in the first scroll.",
+  },
+  {
+    id: "16",
+    title: "Eco Fashion BD",
+    subtitle: "Bengali-first storefront for Bangladesh shoppers",
+    description:
+      "Eco Fashion BD is a live store built around how local customers browse: Bangla UI, promotional pricing, category shortcuts, and cash-on-delivery messaging. The catalog is centered on premium sunglasses, with search, cart, and phone support sitting in the header so the path to an order is never more than one tap away.",
+    image: "/ecofashion_mockup.png",
+    liveLink: "https://ecofashionbd.store/",
+    githubLink: GITHUB_REPOS,
+    details: {
+      client: "Eco Fashion BD",
+      duration: "6 weeks",
+      role: "Full-stack Engineer",
+      category: "E-commerce / Local retail",
+    },
+    features: [
+      "Bengali-first interface for search, categories, and checkout messaging",
+      "Promotional pricing with visible savings to support campaign merchandising",
+      "Header search, cart, and click-to-call for high-intent mobile traffic",
+      "Category navigation for sunglasses and watches",
+      "CDN-backed product imagery for fast loads on slower networks",
     ],
-
-    // Challenges & Solutions (Senior level touch)
-    overview: "The primary challenge was to balance high-quality imagery with fast loading speeds. By leveraging Next.js Image optimization and server-side rendering, I achieved a sub-second page load while maintaining a premium visual aesthetic."
+    stack: {
+      frontend: ["Next.js", "React", "Tailwind CSS"],
+      media: ["ImageKit"],
+      deployment: ["Vercel", "ecofashionbd.store"],
+    },
+    gallery: ["/ecofashion_mockup.png"],
+    overview:
+      "A store for this market cannot be an English template with a translated footer. I designed the primary journey in Bangla, put price and discount in the product card, and kept support (phone) next to the cart. Image delivery goes through a CDN so campaign banners stay sharp without punishing page weight. It is a commercial site, not a concept deck.",
   },
   {
     id: "7",
